@@ -49,8 +49,9 @@ Go back → **Reference build — proof-gated release** → **Run seeded sample*
 
 Show the SERV panel, then the Reppo panel, then the payment stamp.
 
-> "SERV accepts. Reppo's independent verdict accepts with high confidence. The
-> amount is under the operator's ceiling, so the policy releases it."
+> "SERV accepts. If Reppo is in live mode, its independent verdict also accepts.
+> The amount is at the operator's ceiling, so the policy releases it. In the
+> public demo Reppo is a labeled sandbox, and the UI says that too."
 
 Click **Open public receipt**, show the graph hash, evidence hash, settlement
 reference.

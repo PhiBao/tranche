@@ -201,7 +201,7 @@ pub async fn seed(pool: &SqlitePool) -> anyhow::Result<()> {
                 "repo_url": "https://github.com/PhiBao/tranche",
                 "demo_url": "https://tranche-serv.fly.dev",
                 "readme_url": "",
-                "claim": "Tranche compiles milestone criteria into an executable acceptance graph and verifies evidence with SERV Reasoning. The public repository contains the Rust executor, and the deployed release room responds."
+                "claim": "The repository is public, its README documents SERV Reasoning, and the deployed demo URL responds with a live page."
             }),
         },
         MilestoneSeed {
@@ -231,7 +231,7 @@ pub async fn seed(pool: &SqlitePool) -> anyhow::Result<()> {
                 "repo_url": "https://github.com/PhiBao/tranche",
                 "demo_url": "https://tranche-serv.fly.dev",
                 "readme_url": "",
-                "claim": "The public repository documents the SERV Reasoning integration. The deployed release room responds and shows the acceptance graph."
+                "claim": "The repository is public, its README documents SERV Reasoning, and the deployed demo URL responds with a live page."
             }),
         },
         MilestoneSeed {

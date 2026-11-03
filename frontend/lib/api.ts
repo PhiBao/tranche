@@ -27,8 +27,25 @@ async function parse<T>(response: Response): Promise<T> {
 }
 
 export async function getJSON<T>(path: string): Promise<T> {
-  const response = await fetch(`${BASE}${path}`, { cache: "no-store" });
-  return parse<T>(response);
+  let lastError: unknown = null;
+  for (let attempt = 0; attempt < 3; attempt += 1) {
+    try {
+      const response = await fetch(`${BASE}${path}`, { cache: "no-store" });
+      if ([502, 503, 504].includes(response.status) && attempt < 2) {
+        await new Promise((resolve) => setTimeout(resolve, 700 * (attempt + 1)));
+        continue;
+      }
+      return parse<T>(response);
+    } catch (error) {
+      lastError = error;
+      if (attempt < 2) {
+        await new Promise((resolve) => setTimeout(resolve, 700 * (attempt + 1)));
+      }
+    }
+  }
+  throw lastError instanceof Error
+    ? lastError
+    : new Error("The demo API is waking up. Refresh in a moment.");
 }
 
 export async function postJSON<T>(path: string, body?: unknown): Promise<T> {

@@ -15,6 +15,10 @@ Built for **SERV Hackathon 02** — Kite track. Deadline: November 15, 2026.
 - **Live blocked receipt:** <https://tranche-serv.fly.dev/receipt/?slug=vzwzg2fsrbnd>
 - **Repository:** this repository (public at submission time)
 
+The public demo scales to zero when idle. The first request can take 5–10 seconds
+while the machine resumes; refresh once if the proxy returns a cold-start error.
+The release room retries its own API reads.
+
 ![Tranche architecture](docs/diagrams/architecture.png)
 
 ---

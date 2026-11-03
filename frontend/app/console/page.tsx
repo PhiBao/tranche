@@ -61,8 +61,8 @@ export default function ConsolePage() {
 
         {error ? (
           <div className="error-box" style={{ marginTop: "24px" }}>
-            Could not load milestones: {error}. Is the Rust API running on port
-            8080?
+            Could not load milestones: {error}. The demo may be waking up; refresh
+            in a moment.
           </div>
         ) : null}
 

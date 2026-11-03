@@ -6,7 +6,7 @@ primary_region = "iad"
 
 [env]
   BIND_ADDR = "0.0.0.0:8080"
-  DATABASE_URL = "sqlite:///data/tranche.db?mode=rwc"
+  DATABASE_URL = "sqlite:///data/tranche-v2.db?mode=rwc"
   FRONTEND_DIR = "/app/frontend/out"
   PUBLIC_BASE_URL = "https://tranche-serv.fly.dev"
   REPPO_MODE = "sandbox"
@@ -23,7 +23,7 @@ primary_region = "iad"
   force_https = true
   auto_stop_machines = "suspend"
   auto_start_machines = true
-  min_machines_running = 1
+  min_machines_running = 0
 
 [[vm]]
   size = "shared-cpu-1x"
