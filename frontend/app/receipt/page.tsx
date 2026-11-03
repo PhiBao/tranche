@@ -227,15 +227,25 @@ function ReceiptInner() {
                   </div>
                   <div className="decision-line">
                     <span
-                      className={`decision ${data.verdict?.reppo.decision ?? "review"}`}
+                      className={`decision ${
+                        data.verdict?.reppo.mode === "live_lite" &&
+                        data.verdict?.reppo.status === "settled"
+                          ? (data.verdict?.reppo.decision ?? "review")
+                          : "advisory"
+                      }`}
                     >
-                      {data.verdict?.reppo.decision ?? data.verdict?.reppo.status ?? "not run"}
+                      {data.verdict?.reppo.mode === "live_lite" &&
+                      data.verdict?.reppo.status === "settled"
+                        ? (data.verdict?.reppo.decision ?? data.verdict?.reppo.status)
+                        : "advisory"}
                     </span>
                     <span className="score">
-                      {data.verdict?.reppo.score !== null &&
+                      {data.verdict?.reppo.mode === "live_lite" &&
+                      data.verdict?.reppo.status === "settled" &&
+                      data.verdict?.reppo.score !== null &&
                       data.verdict?.reppo.score !== undefined
                         ? `${data.verdict.reppo.score}/100`
-                        : "—"}
+                        : "not counted"}
                     </span>
                   </div>
                   <p className="verdict-summary">

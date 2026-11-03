@@ -3,8 +3,8 @@
 **Track:** Kite
 **One line:** Proof-gated milestone payments. Pay when it's proven.
 **Live demo:** https://tranche-serv.fly.dev
-**Released receipt:** https://tranche-serv.fly.dev/receipt/?slug=p6nv6vd92fsk
-**Blocked receipt:** https://tranche-serv.fly.dev/receipt/?slug=xx3mw7cradtx
+**Released receipt:** https://tranche-serv.fly.dev/receipt/?slug=72q7s2w6vwmr
+**Blocked receipt:** https://tranche-serv.fly.dev/receipt/?slug=dfqn6yhkg2pe
 **Repository:** https://github.com/PhiBao/tranche
 **Demo video:** _to be recorded_
 

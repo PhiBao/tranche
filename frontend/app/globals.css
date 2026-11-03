@@ -1469,6 +1469,10 @@ ol {
   color: var(--amber);
 }
 
+.decision.advisory {
+  color: var(--muted);
+}
+
 .score {
   font-family: var(--mono);
   font-size: 10px;

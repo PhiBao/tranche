@@ -508,14 +508,24 @@ function MilestoneInner() {
                     </div>
                     <div className="decision-line">
                       <span
-                        className={`decision ${detail.verdict.reppo.decision ?? "review"}`}
+                        className={`decision ${
+                          detail.verdict.reppo.mode === "live_lite" &&
+                          detail.verdict.reppo.status === "settled"
+                            ? (detail.verdict.reppo.decision ?? "review")
+                            : "advisory"
+                        }`}
                       >
-                        {detail.verdict.reppo.decision ?? detail.verdict.reppo.status}
+                        {detail.verdict.reppo.mode === "live_lite" &&
+                        detail.verdict.reppo.status === "settled"
+                          ? (detail.verdict.reppo.decision ?? detail.verdict.reppo.status)
+                          : "advisory"}
                       </span>
                       <span className="score">
-                        {detail.verdict.reppo.score !== null
+                        {detail.verdict.reppo.mode === "live_lite" &&
+                        detail.verdict.reppo.status === "settled" &&
+                        detail.verdict.reppo.score !== null
                           ? `${detail.verdict.reppo.score}/100`
-                          : detail.verdict.reppo.status}
+                          : "not counted"}
                       </span>
                     </div>
                     <p className="verdict-summary">

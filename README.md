@@ -12,8 +12,8 @@ Built for **SERV Hackathon 02** — Kite track. Deadline: November 15, 2026.
 - **Live demo:** <https://tranche-serv.fly.dev>
 - **Release room:** <https://tranche-serv.fly.dev/console/>
 - **Blocked-payment demo:** <https://tranche-serv.fly.dev/milestone/?id=ms_blocked>
-- **Live blocked receipt:** <https://tranche-serv.fly.dev/receipt/?slug=xx3mw7cradtx>
-- **Live released receipt:** <https://tranche-serv.fly.dev/receipt/?slug=p6nv6vd92fsk>
+- **Live blocked receipt:** <https://tranche-serv.fly.dev/receipt/?slug=dfqn6yhkg2pe>
+- **Live released receipt:** <https://tranche-serv.fly.dev/receipt/?slug=72q7s2w6vwmr>
 - **Repository:** this repository (public at submission time)
 
 The public demo scales to zero when idle. The first request can take 5–10 seconds
