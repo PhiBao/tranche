@@ -97,6 +97,12 @@ pub async fn run(state: AppState, submission_id: String) -> anyhow::Result<()> {
                 {
                     Ok((verdict, meta)) => {
                         serv_engine = meta.engine.clone();
+                        let node_status = match verdict.decision.as_str() {
+                            "accept" => "pass",
+                            "revise" => "warn",
+                            "reject" => "fail",
+                            _ => "warn",
+                        };
                         let detail = format!(
                             "SERV {}: {} — {}",
                             if meta.engine == "fixture" { "fixture evaluator" } else { "Reasoning" },
@@ -114,7 +120,7 @@ pub async fn run(state: AppState, submission_id: String) -> anyhow::Result<()> {
                         });
                         serv_verdict = Some(verdict);
                         NodeOutcome {
-                            status: "pass",
+                            status: node_status,
                             detail,
                             evidence_url: Some(evidence.repo_url.clone()),
                             cost_usd: meta.cost_usd,
