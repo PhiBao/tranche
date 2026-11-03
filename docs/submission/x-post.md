@@ -7,8 +7,8 @@
 > I built **Tranche** for the @openservai SERV Hackathon 02 — Kite track.
 >
 > A milestone rubric becomes an executable acceptance graph. Evidence is checked
-> in code, judged by SERV Reasoning, and reviewed independently by @reppo in live
-> mode. Only then does the Kite Passport adapter release the tranche.
+> in code, judged by SERV Reasoning, and wired for an independent @reppo
+> verdict. Only then does the Kite Passport adapter release the tranche.
 >
 > A padded claim, a 404 demo, or an injection attempt gets a receipt too:
 > **0.00 USDC moved.**

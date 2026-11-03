@@ -64,6 +64,9 @@ export function SiteFooter() {
           </div>
           <div>
             <span className="footer-label">Hackathon</span>
+            <a href="https://github.com/PhiBao/tranche" target="_blank" rel="noreferrer">
+              GitHub ↗
+            </a>
             <a href="https://www.openserv.ai/hackathon-2" target="_blank" rel="noreferrer">
               SERV Hackathon 02 ↗
             </a>

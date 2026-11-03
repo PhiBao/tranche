@@ -12,7 +12,8 @@ Built for **SERV Hackathon 02** — Kite track. Deadline: November 15, 2026.
 - **Live demo:** <https://tranche-serv.fly.dev>
 - **Release room:** <https://tranche-serv.fly.dev/console/>
 - **Blocked-payment demo:** <https://tranche-serv.fly.dev/milestone/?id=ms_blocked>
-- **Live blocked receipt:** <https://tranche-serv.fly.dev/receipt/?slug=vzwzg2fsrbnd>
+- **Live blocked receipt:** <https://tranche-serv.fly.dev/receipt/?slug=xx3mw7cradtx>
+- **Live released receipt:** <https://tranche-serv.fly.dev/receipt/?slug=p6nv6vd92fsk>
 - **Repository:** this repository (public at submission time)
 
 The public demo scales to zero when idle. The first request can take 5–10 seconds
@@ -109,9 +110,10 @@ Open <https://tranche-serv.fly.dev/console/>. Four seeded milestones are availab
    `BLOCKED` with `0.00 USDC` moved. Open the public receipt from the right rail.
 2. **Reference build — proof-gated release** — click `Run seeded sample`. The
    repository, README, and demo checks pass; SERV accepts; the policy releases the
-   tranche if the amount is under the ceiling and the required assurance is
-   configured. If Reppo or SERV is not configured, the UI says so and the payment
-   is held instead. The receipt records the exact reason.
+   tranche because the amount is at the auto-release ceiling. The receipt records
+   the SERV verdict and the settlement reference. If SERV is not configured, the
+   UI labels the verdict `FIXTURE` and holds the payment; if Reppo is unavailable,
+   the UI labels it and assurance drops to medium.
 3. **Grant tranche — independent review** — the same passing evidence, but the
    tranche is above the auto-release ceiling. The payment is held. Click
    `Approve release` to run the operator path; the receipt shows
@@ -121,7 +123,12 @@ Open <https://tranche-serv.fly.dev/console/>. Four seeded milestones are availab
    hostile input without executing it.
 
 Every page labels the engine mode and the payment rail. Nothing simulated is
-presented as live.
+presented as live. The deployed demo runs SERV Reasoning **live**; Reppo is in
+**sandbox** mode (placeholder verdict, never gates); settlement is the labeled
+**demo ledger**. The Kite Passport adapter is implemented but requires the
+operator's passkey and a funded wallet to settle for real.
+
+![The release room after a live SERV verdict](docs/screenshots/live-milestone-released.png)
 
 ### What is real vs. labeled
 
@@ -166,7 +173,7 @@ Tranche is the acceptance layer for Kite-powered agent payments:
 system prompt, low reasoning effort, structured JSON output, `serv_prompt_guard`,
 and `serv_shadow_agent`. The UI shows the SERV engine, model, decision, score,
 reasons, latency, and per-node cost. The graph itself is compiled in Rust; the
-model does not choose which checks exist.
+model does not choose which checks exist. The deployed demo runs this path live.
 
 **Reppo integration.** The verification trace is submitted to the Reppo
 Evaluation API as a `trace` with the milestone criteria. The returned score,
@@ -292,7 +299,7 @@ Terminal 1:
 
 ```bash
 make dev-backend
-# http://127.0.0.1:8090
+# http://127.0.0.1:8080
 ```
 
 Terminal 2:
@@ -302,9 +309,10 @@ make dev-frontend
 # http://127.0.0.1:3000
 ```
 
-`frontend/.env.development` points the browser at `http://127.0.0.1:8090`.
-If port 8090 is taken, change `BIND_ADDR` in `backend/.env` and
-`NEXT_PUBLIC_API_BASE` in `frontend/.env.development`.
+The example frontend environment points the browser at `http://127.0.0.1:8080`.
+Copy `frontend/.env.example` to `frontend/.env.development` if you need a
+different API base. If port 8080 is taken, change `BIND_ADDR` in `backend/.env`
+and `NEXT_PUBLIC_API_BASE` in `frontend/.env.development`.
 
 ### Production / single binary
 
@@ -404,6 +412,8 @@ Restart the backend to reseed the four milestones.
 
 ## 11. Submission artifacts
 
+- `docs/submission/checklist.md` — submission and eligibility checklist.
+- `docs/SECURITY.md` — threat model, controls, and residual risks.
 - `docs/submission/writeup.md` — short write-up for the submission form.
 - `docs/submission/x-post.md` — public X post draft.
 - `docs/submission/demo-script.md` — 2–3 minute demo script.

@@ -56,11 +56,15 @@ Submissions close **2026-11-15 23:59 UTC**. Build period started 2026-11-02.
 ## Status
 
 - [x] Discovery complete, direction approved
-- [ ] Goal set, repository initialized
-- [ ] Backend foundation
-- [ ] Frontend foundation
-- [ ] Integrations (SERV / Reppo / Kite)
-- [ ] Demo data + proof flows
-- [ ] Tests + security review
-- [ ] README + diagrams + submission artifacts
-- [ ] Deployed demo
+- [x] Goal set, repository initialized
+- [x] Rust backend (Axum, SQLx, SQLite) + 15 tests
+- [x] Next.js frontend + static export served by the Rust binary
+- [x] SERV Reasoning live integration (PromptGuard, Shadow Agent, structured verdict)
+- [x] Reppo Evaluation API integration (labeled sandbox in the public demo)
+- [x] Kite Passport payout adapter + labeled demo ledger
+- [x] Seeded demo: release, blocked, injection, over-ceiling
+- [x] Public proof receipts + live deployed demo
+- [x] README, architecture/lifecycle diagrams, security model, screenshots
+- [x] Cold start handled; Fly scales to zero
+- [ ] Record the demo video
+- [ ] Post on X and submit the Typeform

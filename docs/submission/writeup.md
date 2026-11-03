@@ -3,7 +3,9 @@
 **Track:** Kite
 **One line:** Proof-gated milestone payments. Pay when it's proven.
 **Live demo:** https://tranche-serv.fly.dev
-**Repository:** this repository
+**Released receipt:** https://tranche-serv.fly.dev/receipt/?slug=p6nv6vd92fsk
+**Blocked receipt:** https://tranche-serv.fly.dev/receipt/?slug=xx3mw7cradtx
+**Repository:** https://github.com/PhiBao/tranche
 **Demo video:** _to be recorded_
 
 ## The problem
@@ -53,7 +55,9 @@ approve, and a blocked payment can never be approved.
 
 The public demo runs a **labeled demo ledger** because live Passport settlement
 requires the operator's passkey and a funded USDC.e wallet. The UI never calls the
-ledger "Kite"; the adapter and the setup are documented in the README.
+ledger "Kite"; the adapter is `scripts/kite_payout.sh` and the setup is documented
+in the README. The deployed demo runs SERV Reasoning live and Reppo in labeled
+sandbox mode.
 
 ## What was built during the hackathon
 
