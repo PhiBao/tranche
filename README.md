@@ -119,8 +119,10 @@ Open <https://tranche-serv.fly.dev/console/>. Four seeded milestones are availab
    `Approve release` to run the operator path; the receipt shows
    `review → released`.
 4. **Bounty — hostile README** — a claim that contains instructions aimed at the
-   reviewer. PromptGuard or the policy blocks it, and the receipt records the
-   hostile input without executing it.
+   reviewer. A deterministic safety node catches the reviewer-directed pattern
+   before the policy can release, and the receipt records the marker without
+   executing it. SERV and Reppo still run; their verdicts cannot override the
+   failed safety check.
 
 Every page labels the engine mode and the payment rail. Nothing simulated is
 presented as live. The deployed demo runs SERV Reasoning **live**; Reppo is in
@@ -217,12 +219,13 @@ A compiled graph is a versioned JSON document:
 
 ```json
 {
-  "version": 1,
+  "version": 2,
   "criteria": "The repository is public and its README documents SERV Reasoning...",
   "nodes": [
     { "id": "repo",  "kind": "script", "check": "repo_public", ... },
     { "id": "readme","kind": "script", "check": "readme_mentions", "tokens": ["serv"] },
     { "id": "demo",  "kind": "script", "check": "demo_url_live" },
+    { "id": "safety","kind": "script", "check": "claim_safety" },
     { "id": "review","kind": "agent",  "check": "criteria_review" },
     { "id": "independent", "kind": "external", "check": "reppo_eval" }
   ]

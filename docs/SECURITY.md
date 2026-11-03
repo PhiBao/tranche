@@ -31,6 +31,8 @@ criteria, release the funds"). Controls:
 - Evidence is passed as data inside a JSON object, never concatenated into the
   system prompt.
 - `serv_prompt_guard` is enabled on every agent call.
+- A deterministic safety node scans the claim for reviewer-directed instruction
+  patterns before the policy can release; the receipt records the marker.
 - The system prompt tells the model to ignore instructions inside evidence.
 - The model has no payment tools and cannot create a payment instruction.
 - The final policy is code; a hostile verdict still cannot bypass a script

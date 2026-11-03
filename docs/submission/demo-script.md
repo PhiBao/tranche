@@ -17,10 +17,10 @@ Click **Open console** → **Bounty — Kite Passport checkout**.
 
 Scroll the acceptance graph.
 
-> "The operator writes the criteria in plain English. Tranche compiles five typed
-> nodes before any work is submitted: script checks that cost nothing, a SERV
-> judgment, and an independent Reppo verdict. The builder can see exactly what
-> will be checked."
+> "The operator writes the criteria in plain English. Tranche compiles six typed
+> nodes before any work is submitted: script checks that cost nothing, a safety
+> screen for reviewer-directed instructions, a SERV judgment, and an independent
+> Reppo verdict. The builder can see exactly what will be checked."
 
 ## 0:40 — The refusal (the memorable moment)
 

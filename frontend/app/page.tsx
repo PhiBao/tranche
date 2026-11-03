@@ -70,8 +70,9 @@ export default function HomePage() {
             <DossierNode index="01" label="Repository is public" status="passed" />
             <DossierNode index="02" label="README documents SERV" status="passed" />
             <DossierNode index="03" label="Live demo responds" status="passed" />
-            <DossierNode index="04" label="SERV acceptance review" status="accept" />
-            <DossierNode index="05" label="Reppo independent verdict" status="accept" />
+            <DossierNode index="04" label="Claim safety screen" status="passed" />
+            <DossierNode index="05" label="SERV acceptance review" status="accept" />
+            <DossierNode index="06" label="Reppo independent verdict" status="accept" />
             <div className="dossier-stamp">
               <Stamp tone="green">Released</Stamp>
             </div>

@@ -149,6 +149,14 @@ pub fn compile_criteria(criteria: &str) -> AcceptanceGraph {
             hint: None,
         },
         GraphNode {
+            id: "safety".into(),
+            kind: NodeKind::Script,
+            label: "Claim is free of reviewer-directed instructions".into(),
+            check: Some("claim_safety".into()),
+            tokens: vec![],
+            hint: None,
+        },
+        GraphNode {
             id: "review".into(),
             kind: NodeKind::Agent,
             label: "Claim is supported by the evidence".into(),
@@ -185,7 +193,7 @@ pub fn compile_criteria(criteria: &str) -> AcceptanceGraph {
     }
 
     AcceptanceGraph {
-        version: 1,
+        version: 2,
         criteria: criteria.trim().to_string(),
         nodes,
     }
@@ -354,8 +362,9 @@ mod tests {
         let graph = compile_criteria("Public repo. README documents SERV Reasoning and Kite Passport.");
         let readme = graph.nodes.iter().find(|n| n.id == "readme").unwrap();
         assert_eq!(readme.tokens, vec!["serv", "kite"]);
-        assert_eq!(graph.version, 1);
+        assert_eq!(graph.version, 2);
         assert!(graph.nodes.iter().any(|n| n.id == "review"));
+        assert!(graph.nodes.iter().any(|n| n.id == "safety"));
     }
 
     #[test]
