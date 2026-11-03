@@ -73,6 +73,14 @@ padded claim, a dead demo, or an instruction hidden in a submission should not b
 able to reach a payment rail. Tranche makes the refusal as legible as the release,
 and gives both sides a receipt.
 
+## Economic model
+
+Tranche charges 1–2% of released tranches, or a per-verification fee for programs
+that prefer to keep settlement in their existing rail. The buyer is the program
+operator; the cost is justified against the manual review time and the risk of
+paying for unverified work. Every grant program, bounty board, and hackathon is a
+distribution channel, and each public receipt is a shareable proof artifact.
+
 ## What is real vs. labeled
 
 The README contains the full table. In short: script checks, hashes, policy,
