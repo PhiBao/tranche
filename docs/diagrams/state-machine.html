@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Tranche milestone lifecycle</title>
+  <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --paper: #f4f2ec;
+      --ink: #14161c;
+      --muted: #4a4f5c;
+      --soft: #8b909c;
+      --accent: #0d6e6e;
+      --link: #a8253c;
+      --amber: #8a5a14;
+      --sans: "Inter", system-ui, sans-serif;
+      --serif: "Instrument Serif", Georgia, serif;
+      --mono: "JetBrains Mono", ui-monospace, monospace;
+    }
+    body {
+      font-family: var(--sans);
+      background: var(--paper);
+      color: var(--ink);
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 3rem 2rem;
+    }
+    .frame { max-width: 1080px; width: 100%; }
+    .eyebrow {
+      font-family: var(--mono);
+      font-size: 0.66rem;
+      font-weight: 500;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin-bottom: 0.5rem;
+    }
+    h1 {
+      font-family: var(--serif);
+      font-size: clamp(1.5rem, 2.4vw + 0.75rem, 2rem);
+      font-weight: 400;
+      letter-spacing: -0.02em;
+      line-height: 1.15;
+      margin-bottom: 1.5rem;
+    }
+    .diagram-container { width: 100%; overflow-x: auto; }
+    svg { width: 100%; min-width: 960px; display: block; }
+    @media print {
+      .diagram-container { overflow-x: visible; }
+      svg { min-width: 0; }
+    }
+  </style>
+</head>
+<body>
+  <div class="frame">
+    <p class="eyebrow">State machine · payment policy</p>
+    <h1>Milestone lifecycle</h1>
+
+    <div class="diagram-container">
+      <svg viewBox="0 0 960 560" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="lifecycle-title lifecycle-desc">
+        <title id="lifecycle-title">Tranche milestone lifecycle</title>
+        <desc id="lifecycle-desc">A milestone moves from open to submitted and verifying, then to released, blocked, or review; only a passing policy or an explicit operator approval settles the tranche.</desc>
+
+        <defs>
+          <marker id="arrow" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto"><polygon points="0 0, 8 3, 0 6" fill="#4a4f5c" /></marker>
+          <marker id="arrow-accent" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto"><polygon points="0 0, 8 3, 0 6" fill="#0d6e6e" /></marker>
+          <marker id="arrow-link" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto"><polygon points="0 0, 8 3, 0 6" fill="#a8253c" /></marker>
+        </defs>
+
+        <rect width="100%" height="100%" fill="#f4f2ec" />
+
+        <!-- transitions first -->
+        <path d="M 66,268 H 100" fill="none" stroke="#4a4f5c" stroke-width="1.2" marker-end="url(#arrow)" />
+        <path d="M 250,268 H 300" fill="none" stroke="#4a4f5c" stroke-width="1.2" marker-end="url(#arrow)" />
+        <path d="M 450,268 H 500" fill="none" stroke="#4a4f5c" stroke-width="1.2" marker-end="url(#arrow)" />
+        <path d="M 650,254 H 692 Q 700,254 700,246 V 136 Q 700,128 708,128 H 740" fill="none" stroke="#0d6e6e" stroke-width="1.4" marker-end="url(#arrow-accent)" />
+        <path d="M 650,268 H 740" fill="none" stroke="#a8253c" stroke-width="1.2" marker-end="url(#arrow-link)" />
+        <path d="M 650,282 H 682 Q 690,282 690,290 V 400 Q 690,408 698,408 H 740" fill="none" stroke="#8a5a14" stroke-width="1.2" marker-end="url(#arrow)" />
+        <path d="M 890,408 H 916 Q 924,408 924,400 V 136 Q 924,128 916,128 H 890" fill="none" stroke="#0d6e6e" stroke-width="1.4" marker-end="url(#arrow-accent)" />
+        <path d="M 890,268 H 936 Q 944,268 944,276 V 492 Q 944,500 936,500 H 383 Q 375,500 375,492 V 300" fill="none" stroke="#4a4f5c" stroke-width="1.2" marker-end="url(#arrow)" />
+
+        <!-- transition labels -->
+        <rect x="252" y="244" width="40" height="12" rx="2" fill="#f4f2ec" />
+        <text x="272" y="253" fill="#4a4f5c" font-size="8" font-family="'JetBrains Mono', monospace" text-anchor="middle" letter-spacing="0.06em">SUBMIT</text>
+
+        <rect x="456" y="244" width="40" height="12" rx="2" fill="#f4f2ec" />
+        <text x="476" y="253" fill="#4a4f5c" font-size="8" font-family="'JetBrains Mono', monospace" text-anchor="middle" letter-spacing="0.06em">VERIFY</text>
+
+        <rect x="706" y="187" width="40" height="12" rx="2" fill="#f4f2ec" />
+        <text x="726" y="196" fill="#0d6e6e" font-size="8" font-family="'JetBrains Mono', monospace" text-anchor="middle" letter-spacing="0.06em">PASS</text>
+
+        <rect x="672" y="244" width="40" height="12" rx="2" fill="#f4f2ec" />
+        <text x="692" y="253" fill="#a8253c" font-size="8" font-family="'JetBrains Mono', monospace" text-anchor="middle" letter-spacing="0.06em">FAIL</text>
+
+        <rect x="696" y="328" width="50" height="12" rx="2" fill="#f4f2ec" />
+        <text x="721" y="337" fill="#8a5a14" font-size="8" font-family="'JetBrains Mono', monospace" text-anchor="middle" letter-spacing="0.06em">REVIEW</text>
+
+        <rect x="874" y="320" width="44" height="12" rx="2" fill="#f4f2ec" />
+        <text x="896" y="329" fill="#0d6e6e" font-size="8" font-family="'JetBrains Mono', monospace" text-anchor="middle" letter-spacing="0.06em">APPROVE</text>
+
+        <rect x="608" y="482" width="64" height="12" rx="2" fill="#f4f2ec" />
+        <text x="640" y="491" fill="#4a4f5c" font-size="8" font-family="'JetBrains Mono', monospace" text-anchor="middle" letter-spacing="0.06em">REVISION</text>
+
+        <!-- start -->
+        <circle cx="60" cy="268" r="6" fill="#14161c" />
+
+        <!-- open -->
+        <g>
+          <rect x="100" y="236" width="150" height="64" rx="8" fill="#f4f2ec" />
+          <rect x="100" y="236" width="150" height="64" rx="8" fill="#f4f2ec" stroke="#14161c" stroke-width="1" />
+          <text x="175" y="262" fill="#14161c" font-size="13" font-weight="600" font-family="'Inter', sans-serif" text-anchor="middle">OPEN</text>
+          <text x="175" y="280" fill="#4a4f5c" font-size="9" font-family="'JetBrains Mono', monospace" text-anchor="middle">criteria published</text>
+        </g>
+
+        <!-- submitted -->
+        <g>
+          <rect x="300" y="236" width="150" height="64" rx="8" fill="#f4f2ec" />
+          <rect x="300" y="236" width="150" height="64" rx="8" fill="#f4f2ec" stroke="#14161c" stroke-width="1" />
+          <text x="375" y="262" fill="#14161c" font-size="13" font-weight="600" font-family="'Inter', sans-serif" text-anchor="middle">SUBMITTED</text>
+          <text x="375" y="280" fill="#4a4f5c" font-size="9" font-family="'JetBrains Mono', monospace" text-anchor="middle">evidence hashed</text>
+        </g>
+
+        <!-- verifying -->
+        <g>
+          <rect x="500" y="236" width="150" height="64" rx="8" fill="#f4f2ec" />
+          <rect x="500" y="236" width="150" height="64" rx="8" fill="#f4f2ec" stroke="#14161c" stroke-width="1" />
+          <text x="575" y="262" fill="#14161c" font-size="13" font-weight="600" font-family="'Inter', sans-serif" text-anchor="middle">VERIFYING</text>
+          <text x="575" y="280" fill="#4a4f5c" font-size="9" font-family="'JetBrains Mono', monospace" text-anchor="middle">graph running</text>
+        </g>
+
+        <!-- released -->
+        <g>
+          <rect x="740" y="96" width="150" height="64" rx="8" fill="#f4f2ec" />
+          <rect x="740" y="96" width="150" height="64" rx="8" fill="rgba(13,110,110,0.08)" stroke="#0d6e6e" stroke-width="1.4" />
+          <text x="815" y="122" fill="#0d6e6e" font-size="13" font-weight="600" font-family="'Inter', sans-serif" text-anchor="middle">RELEASED</text>
+          <text x="815" y="140" fill="#0d6e6e" font-size="9" font-family="'JetBrains Mono', monospace" text-anchor="middle">settled</text>
+        </g>
+
+        <!-- bounced -->
+        <g>
+          <rect x="740" y="236" width="150" height="64" rx="8" fill="#f4f2ec" />
+          <rect x="740" y="236" width="150" height="64" rx="8" fill="rgba(168,37,60,0.07)" stroke="#a8253c" stroke-width="1.2" />
+          <text x="815" y="262" fill="#a8253c" font-size="13" font-weight="600" font-family="'Inter', sans-serif" text-anchor="middle">BLOCKED</text>
+          <text x="815" y="280" fill="#a8253c" font-size="9" font-family="'JetBrains Mono', monospace" text-anchor="middle">no funds moved</text>
+        </g>
+
+        <!-- review -->
+        <g>
+          <rect x="740" y="376" width="150" height="64" rx="8" fill="#f4f2ec" />
+          <rect x="740" y="376" width="150" height="64" rx="8" fill="rgba(138,90,20,0.07)" stroke="#8a5a14" stroke-width="1.2" />
+          <text x="815" y="402" fill="#8a5a14" font-size="13" font-weight="600" font-family="'Inter', sans-serif" text-anchor="middle">REVIEW</text>
+          <text x="815" y="420" fill="#8a5a14" font-size="9" font-family="'JetBrains Mono', monospace" text-anchor="middle">operator decides</text>
+        </g>
+
+        <!-- annotation -->
+        <text x="40" y="530" fill="#8b909c" font-size="14" font-family="'Instrument Serif', serif" font-style="italic">Revisions re-enter Submitted. Every transition is written to the audit log.</text>
+      </svg>
+    </div>
+  </div>
+</body>
+</html>

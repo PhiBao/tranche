@@ -1,0 +1,12 @@
+**/node_modules
+**/.next
+**/out
+**/target
+**/data
+**/.env
+**/.env.*
+.git
+docs/diagrams/*.html
+docs/diagrams/*.png
+docs/screenshots
+*.log

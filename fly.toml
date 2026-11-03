@@ -1,0 +1,30 @@
+app = "tranche-serv"
+primary_region = "iad"
+
+[build]
+  dockerfile = "Dockerfile"
+
+[env]
+  BIND_ADDR = "0.0.0.0:8080"
+  DATABASE_URL = "sqlite:///data/tranche.db?mode=rwc"
+  FRONTEND_DIR = "/app/frontend/out"
+  PUBLIC_BASE_URL = "https://tranche-serv.fly.dev"
+  REPPO_MODE = "sandbox"
+  KITE_MODE = "ledger"
+  ALLOW_MEDIUM_ASSURANCE = "true"
+  ALLOW_FIXTURE_RELEASE = "false"
+
+[[mounts]]
+  source = "tranche_data"
+  destination = "/data"
+
+[http_service]
+  internal_port = 8080
+  force_https = true
+  auto_stop_machines = "suspend"
+  auto_start_machines = true
+  min_machines_running = 1
+
+[[vm]]
+  size = "shared-cpu-1x"
+  memory = "512mb"
