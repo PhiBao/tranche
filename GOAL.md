@@ -57,7 +57,7 @@ Submissions close **2026-11-15 23:59 UTC**. Build period started 2026-11-02.
 
 - [x] Discovery complete, direction approved
 - [x] Goal set, repository initialized
-- [x] Rust backend (Axum, SQLx, SQLite) + 15 tests
+- [x] Rust backend (Axum, SQLx, SQLite) + 16 tests
 - [x] Next.js frontend + static export served by the Rust binary
 - [x] SERV Reasoning live integration (PromptGuard, Shadow Agent, structured verdict)
 - [x] Reppo Evaluation API integration (labeled sandbox in the public demo)
