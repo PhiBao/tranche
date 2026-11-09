@@ -126,9 +126,10 @@ Open <https://tranche-serv.fly.dev/console/>. Four seeded milestones are availab
 
 Every page labels the engine mode and the payment rail. Nothing simulated is
 presented as live. The deployed demo runs SERV Reasoning **live** and Reppo
-**live** (x402 credits, independent verdict); settlement is the labeled
-**demo ledger**. The Kite Passport adapter is implemented but requires the
-operator's passkey and a funded wallet to settle for real.
+**live** (independent verdict); settlement is the labeled **demo ledger**. The
+Kite Passport adapter is implemented with a passkey approval URL and a separate
+status check; it requires the operator's passkey and a funded wallet to settle
+for real.
 
 ![The release room after a live SERV verdict](docs/screenshots/live-milestone-released.png)
 
