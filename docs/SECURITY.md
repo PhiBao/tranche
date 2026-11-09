@@ -100,7 +100,8 @@ token and a funded, least-privilege wallet.
 
 - A milestone accepts at most 20 submissions in the demo.
 - Claims are capped at 4,000 characters; URLs at 2,048; tranches at 100,000 USDC.
-- Reppo lite is called only when configured; sandbox is free and labeled.
+- Reppo is called only when configured; the `sandbox` fallback is a labeled
+  advisory with no network call and never gates a payment.
 - There is no per-IP rate limit. Add one before exposing the app to sustained
   public traffic.
 
