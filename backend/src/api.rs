@@ -737,6 +737,72 @@ pub async fn refresh_reppo(
     })))
 }
 
+pub async fn kite_retry(
+    State(state): State<AppState>,
+    Path(id): Path<String>,
+) -> ApiResult<Value> {
+    let payment = store::get_payment(&state.pool, &id)
+        .await
+        .map_err(internal)?
+        .ok_or_else(|| ApiError::new(StatusCode::NOT_FOUND, "Payment not found"))?;
+    if payment.rail != "kite_passport" {
+        return Err(ApiError::new(
+            StatusCode::BAD_REQUEST,
+            "This payment is not on the Kite Passport rail.",
+        ));
+    }
+    if payment.status == "settled" {
+        return Err(ApiError::new(StatusCode::CONFLICT, "Payment already settled."));
+    }
+    let submission = store::get_submission(&state.pool, &payment.submission_id)
+        .await
+        .map_err(internal)?
+        .ok_or_else(|| ApiError::new(StatusCode::NOT_FOUND, "Submission not found"))?;
+    let milestone = store::get_milestone(&state.pool, &submission.milestone_id)
+        .await
+        .map_err(internal)?;
+
+    let settlement = crate::payments::settle(
+        &state.cfg.kite,
+        &id,
+        payment.amount_cents,
+        &payment.currency,
+        &submission.builder,
+        &milestone.title,
+    )
+    .await;
+
+    sqlx::query(
+        "UPDATE payments SET status = ?, tx_ref = ?, explorer_url = ?, session_ref = ?, approval_url = ?, note = ? WHERE id = ?",
+    )
+    .bind(&settlement.status)
+    .bind(settlement.tx_ref.as_deref())
+    .bind(settlement.explorer_url.as_deref())
+    .bind(settlement.session_ref.as_deref())
+    .bind(settlement.approval_url.as_deref())
+    .bind(&settlement.note)
+    .bind(&id)
+    .execute(&state.pool)
+    .await
+    .map_err(internal)?;
+
+    if settlement.status == "settled" {
+        store::set_state(&state.pool, &milestone.id, "released")
+            .await
+            .map_err(internal)?;
+        executor::ensure_receipt(&state, &payment.submission_id, &milestone.id)
+            .await
+            .map_err(internal)?;
+    }
+
+    Ok(Json(json!({
+        "status": settlement.status,
+        "approval_url": settlement.approval_url,
+        "request_id": settlement.session_ref,
+        "note": settlement.note,
+    })))
+}
+
 pub async fn kite_status(
     State(state): State<AppState>,
     Path(id): Path<String>,
