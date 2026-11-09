@@ -70,6 +70,7 @@ pub struct KiteConfig {
     pub mode: KiteMode,
     pub payee: Option<String>,
     pub payout_command: Option<String>,
+    pub status_command: Option<String>,
 }
 
 impl KiteConfig {
@@ -168,6 +169,7 @@ impl Config {
                 mode: kite_mode,
                 payee: env_opt("KITE_PAYEE"),
                 payout_command: env_opt("KITE_PAYOUT_COMMAND"),
+                status_command: env_opt("KITE_STATUS_COMMAND"),
             },
             github_token: env_opt("GITHUB_TOKEN"),
             operator_token: env_opt("OPERATOR_TOKEN"),

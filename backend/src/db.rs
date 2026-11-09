@@ -140,6 +140,7 @@ pub async fn init_db(pool: &SqlitePool) -> anyhow::Result<()> {
             tx_ref TEXT,
             explorer_url TEXT,
             session_ref TEXT,
+            approval_url TEXT,
             note TEXT NOT NULL DEFAULT '',
             created_at TEXT NOT NULL
         )"#,
@@ -162,6 +163,11 @@ pub async fn init_db(pool: &SqlitePool) -> anyhow::Result<()> {
     for statement in statements {
         sqlx::query(statement).execute(pool).await?;
     }
+
+    // Additive migration for existing demo volumes.
+    let _ = sqlx::query("ALTER TABLE payments ADD COLUMN approval_url TEXT")
+        .execute(pool)
+        .await;
 
     Ok(())
 }

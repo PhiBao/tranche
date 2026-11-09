@@ -297,8 +297,7 @@ pub async fn run(state: AppState, submission_id: String) -> anyhow::Result<()> {
         FinalDecision::Release => {
             sqlx::query(
                 "INSERT INTO payments (id, submission_id, amount_cents, currency, rail, status, note, created_at) VALUES (?, ?, ?, ?, ?, 'pending', 'Release approved by policy; settlement in progress.', ?)",
-            )
-            .bind(&payment_id)
+            )            .bind(&payment_id)
             .bind(&submission.id)
             .bind(milestone.amount_cents)
             .bind(&milestone.currency)
@@ -318,12 +317,13 @@ pub async fn run(state: AppState, submission_id: String) -> anyhow::Result<()> {
             .await;
 
             sqlx::query(
-                "UPDATE payments SET status = ?, tx_ref = ?, explorer_url = ?, session_ref = ?, note = ? WHERE id = ?",
+                "UPDATE payments SET status = ?, tx_ref = ?, explorer_url = ?, session_ref = ?, approval_url = ?, note = ? WHERE id = ?",
             )
             .bind(&settlement.status)
             .bind(settlement.tx_ref.as_deref())
             .bind(settlement.explorer_url.as_deref())
             .bind(settlement.session_ref.as_deref())
+            .bind(settlement.approval_url.as_deref())
             .bind(&settlement.note)
             .bind(&payment_id)
             .execute(&state.pool)
@@ -342,6 +342,15 @@ pub async fn run(state: AppState, submission_id: String) -> anyhow::Result<()> {
                         format_amount(milestone.amount_cents),
                         settlement.rail
                     ),
+                )
+                .await?;
+            } else if settlement.status == "pending_approval" {
+                store::set_state(&state.pool, &milestone.id, "needs_review").await?;
+                store::add_event(
+                    &state.pool,
+                    &milestone.id,
+                    "kite_approval_pending",
+                    "Kite Passport approval is required. Open the approval link, then check the settlement status.",
                 )
                 .await?;
             } else {

@@ -6,11 +6,14 @@
 #   TRANCHE_RECIPIENT (the builder handle), TRANCHE_MILESTONE, TRANCHE_PAYEE
 #
 # Requirements:
-#   - `kpass` installed and signed in on the operator machine
-#   - KITE_RECIPIENT_ADDRESS set to the builder's Kite-chain wallet
+#   - `kpass` installed and the operator signed in WITH A PASSKEY
+#   - KITE_RECIPIENT_ADDRESS: the builder's wallet on the payout chain
+#   - KITE_CHAIN (default: base)
 #
-# The script prints a JSON object. Tranche records tx_ref / txHash / hash and
-# explorer_url if present. Nothing is printed to stderr on success.
+# This script only *creates* the Passport approval request. It prints the
+# approval URL and the request id. The operator approves with their passkey,
+# then Tranche calls KITE_STATUS_COMMAND (see kite_status.sh) to settle and
+# record the transaction.
 
 set -euo pipefail
 
@@ -32,6 +35,7 @@ PY
 )"
 
 kpass wallet send \
+  --chain "${KITE_CHAIN:-base}" \
   --to "$KITE_RECIPIENT_ADDRESS" \
   --amount "$amount" \
   --asset "${TRANCHE_CURRENCY:-USDC}" \

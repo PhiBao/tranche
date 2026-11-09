@@ -109,6 +109,7 @@ export interface PaymentView {
   tx_ref: string | null;
   explorer_url: string | null;
   session_ref: string | null;
+  approval_url: string | null;
   note: string;
   created_at: string;
 }

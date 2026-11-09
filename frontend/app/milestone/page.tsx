@@ -40,6 +40,8 @@ function paymentStamp(status: string) {
       return { label: "Blocked", tone: "red" as const };
     case "held":
       return { label: "Held", tone: "amber" as const };
+    case "pending_approval":
+      return { label: "Awaiting approval", tone: "amber" as const };
     case "failed":
       return { label: "Failed", tone: "red" as const };
     default:
@@ -153,14 +155,27 @@ function MilestoneInner() {
     }
   }
 
-  async function refreshReppo() {
-    setBusy("refresh");
+  async function refreshReppo() {    setBusy("refresh");
     setActionError("");
     try {
       await postJSON(`/api/milestones/${id}/refresh`);
       await load(true);
     } catch (err) {
       setActionError(err instanceof Error ? err.message : "Could not refresh the Reppo verdict.");
+    } finally {
+      setBusy(null);
+    }
+  }
+
+  async function checkKite() {
+    if (!detail?.payment) return;
+    setBusy("kite");
+    setActionError("");
+    try {
+      await postJSON(`/api/payments/${detail.payment.id}/kite-status`);
+      await load(true);
+    } catch (err) {
+      setActionError(err instanceof Error ? err.message : "Could not check the Kite approval.");
     } finally {
       setBusy(null);
     }
@@ -654,6 +669,33 @@ function MilestoneInner() {
                     </span>
                   </div>
                   <p className="rail-note">{payment.note}</p>
+                  {payment.approval_url ? (
+                    <p className="rail-note">
+                      <a
+                        href={payment.approval_url}
+                        target="_blank"
+                        rel="noreferrer"
+                        className="text-link"
+                      >
+                        Approve in Kite Passport <span aria-hidden="true">↗</span>
+                      </a>
+                    </p>
+                  ) : null}
+                  {payment.status === "pending_approval" ? (
+                    <div className="approve-box">
+                      <p>
+                        The Passport payout is waiting for the operator&rsquo;s
+                        passkey. Approve it in Kite, then check the status here.
+                      </p>
+                      <button
+                        className="button small"
+                        onClick={checkKite}
+                        disabled={busy !== null}
+                      >
+                        {busy === "kite" ? "Checking…" : "Check approval"}
+                      </button>
+                    </div>
+                  ) : null}
                   {payment.status === "held" &&
                   detail.verdict?.serv.decision === "accept" ? (
                     <div className="approve-box">

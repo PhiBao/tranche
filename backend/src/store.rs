@@ -105,6 +105,7 @@ pub struct PaymentRow {
     pub tx_ref: Option<String>,
     pub explorer_url: Option<String>,
     pub session_ref: Option<String>,
+    pub approval_url: Option<String>,
     pub note: String,
     pub created_at: String,
 }

@@ -62,6 +62,7 @@ async fn main() -> anyhow::Result<()> {
         .route("/milestones/{id}/sample", post(api::submit_sample))
         .route("/submissions/{id}/verify", post(api::verify_submission))
         .route("/milestones/{id}/refresh", post(api::refresh_reppo))
+        .route("/payments/{id}/kite-status", post(api::kite_status))
         .route("/payments/{id}/approve", post(api::approve_payment))
         .route("/receipts/{slug}", get(api::receipt_detail));
 

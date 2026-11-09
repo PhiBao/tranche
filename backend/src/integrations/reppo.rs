@@ -30,7 +30,7 @@ pub async fn evaluate(
 async fn live(
     cfg: &ReppoConfig,
     http: &Client,
-    milestone_title: &str,
+    _milestone_title: &str,
     criteria: &str,
     trace: &str,
 ) -> ReppoVerdict {
@@ -42,11 +42,11 @@ async fn live(
     };
 
     let input = format!(
-        "Milestone: {milestone_title}\n\nAcceptance criteria:\n{criteria}\n\nVerification trace (agent output to judge):\n{trace}"
+        "You are an independent evaluator for a milestone payment. Judge the CLAIM against the evidence, not the prose style of the response.\n\nMilestone criteria:\n{criteria}\n\nEvidence bundle (JSON):\n{trace}\n\nQuestion: Does the evidence support the claim and satisfy the milestone criteria? Return a verdict on the claim."
     );
     let truncated = input.chars().take(48_000).collect::<String>();
     let payload = json!({
-        "taskType": "response",
+        "taskType": "claim",
         "input": truncated,
     });
 
