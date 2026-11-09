@@ -80,14 +80,34 @@ pub async fn run(state: AppState, submission_id: String) -> anyhow::Result<()> {
                 }
             }
             (NodeKind::Script, Some("demo_url_live")) => check_demo(&evidence).await,
+            (NodeKind::Script, Some("claims_grounded")) => {
+                check_claims_grounded(&state, &evidence, &readme_excerpt).await
+            }
             (NodeKind::Script, Some("claim_safety")) => check_claim_safety(&evidence),
             (NodeKind::Script, Some("repo_recent_commit")) => {
                 check_recent_commit(&state, &evidence).await
             }
+            (NodeKind::Script, Some("ci_passes")) => {
+                check_ci_passes(&state, &evidence).await
+            }
             (NodeKind::Agent, Some("criteria_review")) => {
                 let facts = script_facts.clone();
+                let since = (chrono::Utc::now() - chrono::Duration::days(1)).to_rfc3339();
+                let spent: f64 = sqlx::query_scalar("SELECT COALESCE(SUM(cost_usd), 0.0) FROM node_runs WHERE created_at >= ?")
+                    .bind(&since)
+                    .fetch_one(&state.pool)
+                    .await
+                    .unwrap_or(0.0);
+                let over_budget = spent >= state.cfg.serv_daily_budget_usd;
+                let effective_serv = if over_budget {
+                    let mut downgraded = state.cfg.serv.clone();
+                    downgraded.api_key = None;
+                    downgraded
+                } else {
+                    state.cfg.serv.clone()
+                };
                 match serv::judge(
-                    &state.cfg.serv,
+                    &effective_serv,
                     &state.http,
                     &milestone.criteria,
                     &evidence,
@@ -105,10 +125,11 @@ pub async fn run(state: AppState, submission_id: String) -> anyhow::Result<()> {
                             _ => "warn",
                         };
                         let detail = format!(
-                            "SERV {}: {} — {}",
+                            "SERV {}: {} — {}{}",
                             if meta.engine == "fixture" { "fixture evaluator" } else { "Reasoning" },
                             verdict.decision,
-                            verdict.summary
+                            verdict.summary,
+                            if over_budget { " Demo SERV budget reached; a labeled fixture verdict was used instead of a live call." } else { "" }
                         );
                         let output = json!({
                             "decision": verdict.decision,
@@ -414,6 +435,11 @@ fn decide(
     if reppo.rejected() {
         return FinalDecision::Bounce;
     }
+    // When live Reppo is configured, an unsettled verdict is not evidence.
+    // Hold the release for a human instead of auto-releasing on SERV alone.
+    if reppo.mode == "live_lite" && reppo.status != "settled" {
+        return FinalDecision::Review;
+    }
     if serv == FinalDecision::Review {
         return FinalDecision::Review;
     }
@@ -541,7 +567,7 @@ async fn check_readme(
             let lower = readme.to_ascii_lowercase();
             let missing: Vec<&String> = tokens
                 .iter()
-                .filter(|token| !lower.contains(token.as_str()))
+                .filter(|token| !contains_word(&lower, &token.to_ascii_lowercase()))
                 .collect();
             if readme.trim().len() < 120 {
                 return Err(NodeOutcome {
@@ -616,6 +642,214 @@ fn check_claim_safety(evidence: &Evidence) -> NodeOutcome {
         None => NodeOutcome {
             status: "pass",
             detail: "No reviewer-directed instruction patterns detected in the claim.".into(),
+            evidence_url: None,
+            cost_usd: 0.0,
+            latency_ms: started.elapsed().as_millis() as i64,
+            output: None,
+        },
+    }
+}
+
+pub fn contains_word(lower_haystack: &str, token: &str) -> bool {
+    if token.is_empty() {
+        return false;
+    }
+    let bytes = lower_haystack.as_bytes();
+    let needle = token.as_bytes();
+    let mut start = 0usize;
+    while let Some(pos) = lower_haystack[start..].find(token) {
+        let at = start + pos;
+        let before_ok = at == 0 || {
+            let c = bytes[at - 1] as char;
+            !(c.is_alphanumeric() || c == '_')
+        };
+        let end = at + needle.len();
+        let after_ok = end >= bytes.len() || {
+            let c = bytes[end] as char;
+            !(c.is_alphanumeric() || c == '_')
+        };
+        if before_ok && after_ok {
+            return true;
+        }
+        start = at + 1;
+    }
+    false
+}
+
+/// Extracts material numbers from a claim (e.g. "14 endpoints", "9,000 users").
+/// Small numbers (0-9 and common ordinals) are ignored.
+pub fn extract_claim_numbers(claim: &str) -> Vec<String> {
+    let mut found: Vec<String> = Vec::new();
+    let mut current = String::new();
+    for ch in claim.chars().chain(std::iter::once(' ')) {
+        if ch.is_ascii_digit() || ch == ',' {
+            current.push(ch);
+        } else {
+            if !current.is_empty() {
+                let digits: String = current.chars().filter(|c| c.is_ascii_digit()).collect();
+                if digits.len() >= 2 && digits.parse::<i64>().map(|n| n >= 10).unwrap_or(false) {
+                    if !found.contains(&digits) {
+                        found.push(digits);
+                    }
+                }
+                current.clear();
+            }
+        }
+    }
+    found
+}
+
+async fn check_claims_grounded(
+    state: &AppState,
+    evidence: &Evidence,
+    readme_excerpt: &str,
+) -> NodeOutcome {
+    let started = std::time::Instant::now();
+    let numbers = extract_claim_numbers(&evidence.claim);
+    if numbers.is_empty() {
+        return NodeOutcome {
+            status: "pass",
+            detail: "No material numeric claims in the submission claim.".into(),
+            evidence_url: None,
+            cost_usd: 0.0,
+            latency_ms: started.elapsed().as_millis() as i64,
+            output: None,
+        };
+    }
+    // Use the README excerpt when available; otherwise fetch the README.
+    let haystack = if readme_excerpt.trim().len() >= 120 {
+        readme_excerpt.to_ascii_lowercase()
+    } else {
+        match fetch_readme_for_grounding(state, evidence).await {
+            Some(text) => text.to_ascii_lowercase(),
+            None => {
+                return NodeOutcome {
+                    status: "fail",
+                    detail: "Numeric claims could not be grounded because the README could not be read.".into(),
+                    evidence_url: None,
+                    cost_usd: 0.0,
+                    latency_ms: started.elapsed().as_millis() as i64,
+                    output: None,
+                }
+            }
+        }
+    };
+    let missing: Vec<String> = numbers
+        .iter()
+        .filter(|n| !haystack.contains(n.as_str()))
+        .cloned()
+        .collect();
+    if missing.is_empty() {
+        NodeOutcome {
+            status: "pass",
+            detail: format!(
+                "All {} numeric claim(s) appear in the README.",
+                numbers.len()
+            ),
+            evidence_url: Some(evidence.repo_url.clone()),
+            cost_usd: 0.0,
+            latency_ms: started.elapsed().as_millis() as i64,
+            output: Some(json!({"numbers": numbers})),
+        }
+    } else {
+        NodeOutcome {
+            status: "fail",
+            detail: format!(
+                "Numeric claim(s) not grounded in the README: {}. Padded metrics cannot release funds.",
+                missing.join(", ")
+            ),
+            evidence_url: Some(evidence.repo_url.clone()),
+            cost_usd: 0.0,
+            latency_ms: started.elapsed().as_millis() as i64,
+            output: Some(json!({"checked": numbers, "missing": missing})),
+        }
+    }
+}
+
+async fn fetch_readme_for_grounding(state: &AppState, evidence: &Evidence) -> Option<String> {
+    let Some((owner, repo)) = github::parse_repo_url(&evidence.repo_url) else {
+        return None;
+    };
+    github::fetch_readme(
+        &state.http,
+        state.cfg.github_token.as_deref(),
+        &owner,
+        &repo,
+        &evidence.readme_url,
+    )
+    .await
+    .ok()
+}
+
+async fn check_ci_passes(state: &AppState, evidence: &Evidence) -> NodeOutcome {
+    let started = std::time::Instant::now();
+    let Some((owner, repo)) = github::parse_repo_url(&evidence.repo_url) else {
+        return NodeOutcome {
+            status: "fail",
+            detail: "Cannot check CI without a valid repository URL.".into(),
+            evidence_url: None,
+            cost_usd: 0.0,
+            latency_ms: started.elapsed().as_millis() as i64,
+            output: None,
+        };
+    };
+    match github::fetch_latest_check_runs(
+        &state.http,
+        state.cfg.github_token.as_deref(),
+        &owner,
+        &repo,
+    )
+    .await
+    {
+        Ok(runs) if runs.is_empty() => NodeOutcome {
+            status: "warn",
+            detail: "No check runs found on the latest commit. CI may not be configured.".into(),
+            evidence_url: Some(milestone_repo_url(&evidence.repo_url)),
+            cost_usd: 0.0,
+            latency_ms: started.elapsed().as_millis() as i64,
+            output: None,
+        },
+        Ok(runs) => {
+            let failed = runs
+                .iter()
+                .filter(|run| run.1.as_deref() == Some("failure"))
+                .count();
+            let pending = runs
+                .iter()
+                .filter(|run| run.0 != "completed")
+                .count();
+            let (status, detail) = if failed > 0 {
+                (
+                    "fail",
+                    format!(
+                        "{} of {} check runs failed on the latest commit.",
+                        failed,
+                        runs.len()
+                    ),
+                )
+            } else if pending > 0 {
+                (
+                    "warn",
+                    format!("{} check run(s) still pending; none failed yet.", pending),
+                )
+            } else {
+                (
+                    "pass",
+                    format!("All {} check run(s) succeeded on the latest commit.", runs.len()),
+                )
+            };
+            NodeOutcome {
+                status,
+                detail,
+                evidence_url: Some(milestone_repo_url(&evidence.repo_url)),
+                cost_usd: 0.0,
+                latency_ms: started.elapsed().as_millis() as i64,
+                output: Some(json!({"runs": runs})),
+            }
+        }
+        Err(error) => NodeOutcome {
+            status: "fail",
+            detail: error,
             evidence_url: None,
             cost_usd: 0.0,
             latency_ms: started.elapsed().as_millis() as i64,
@@ -894,6 +1128,41 @@ mod tests {
             injection_marker("The repository is public and the demo responds."),
             None
         );
+    }
+
+    #[test]
+    fn whole_word_matching_rejects_substrings() {
+        assert!(contains_word("this service documents serv reasoning", "serv"));
+        assert!(!contains_word("this service is great", "serv"));
+        assert!(contains_word("kite passport sessions", "kite"));
+        assert!(!contains_word("kitesurfing is fun", "kite"));
+    }
+
+    #[test]
+    fn extracts_material_claim_numbers() {
+        let numbers = extract_claim_numbers("Shipped 14 endpoints and onboarded 9,000 users in 3 days for 1 release.");
+        assert!(numbers.contains(&"14".to_string()));
+        assert!(numbers.contains(&"9000".to_string()));
+        assert!(!numbers.contains(&"1".to_string()));
+        assert!(!numbers.contains(&"3".to_string()));
+        assert!(extract_claim_numbers("No numbers here.").is_empty());
+    }
+
+    #[test]
+    fn live_pending_verdict_holds_release() {
+        let mut reppo = reppo("live_lite", Some("accept"));
+        reppo.status = "pending".into();
+        let decision = decide(
+            true,
+            FinalDecision::Release,
+            &reppo,
+            Assurance::Medium,
+            5_000,
+            10_000,
+            true,
+            false,
+        );
+        assert_eq!(decision, FinalDecision::Review);
     }
 
     #[test]

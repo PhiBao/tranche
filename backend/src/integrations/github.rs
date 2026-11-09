@@ -153,8 +153,7 @@ pub async fn fetch_latest_commit(
     token: Option<&str>,
     owner: &str,
     repo: &str,
-) -> Result<(String, String, String), String> {
-    let url = format!("https://api.github.com/repos/{owner}/{repo}/commits?per_page=1");
+) -> Result<(String, String, String), String> {    let url = format!("https://api.github.com/repos/{owner}/{repo}/commits?per_page=1");
     let mut request = http.get(url).header("User-Agent", user_agent()).header(
         "Accept",
         "application/vnd.github+json",
@@ -176,6 +175,52 @@ pub async fn fetch_latest_commit(
         first.commit.message.lines().next().unwrap_or("").to_string(),
         first.commit.author.date.clone(),
     ))
+}
+
+/// Returns (status, conclusion) pairs for check runs on the latest commit,
+/// e.g. ("completed","success") or ("in_progress", None).
+pub async fn fetch_latest_check_runs(
+    http: &Client,
+    token: Option<&str>,
+    owner: &str,
+    repo: &str,
+) -> Result<Vec<(String, Option<String>)>, String> {
+    let (sha, _, _) = fetch_latest_commit(http, token, owner, repo).await?;
+    let url = format!(
+        "https://api.github.com/repos/{owner}/{repo}/commits/{sha}/check-runs?per_page=20"
+    );
+    let mut request = http.get(url).header("User-Agent", user_agent()).header(
+        "Accept",
+        "application/vnd.github+json",
+    );
+    if let Some(token) = token {
+        request = request.header("Authorization", format!("Bearer {token}"));
+    }
+    let response = request.send().await.map_err(|e| format!("GitHub request failed: {e}"))?;
+    if !response.status().is_success() {
+        return Err(format!("GitHub check-runs returned HTTP {}", response.status()));
+    }
+    #[derive(Debug, Deserialize)]
+    struct CheckRunsBody {
+        #[serde(default)]
+        check_runs: Vec<CheckRun>,
+    }
+    #[derive(Debug, Deserialize)]
+    struct CheckRun {
+        #[serde(default)]
+        status: Option<String>,
+        #[serde(default)]
+        conclusion: Option<String>,
+    }
+    let body: CheckRunsBody = response
+        .json()
+        .await
+        .map_err(|e| format!("GitHub returned an unexpected check-runs response: {e}"))?;
+    Ok(body
+        .check_runs
+        .into_iter()
+        .map(|run| (run.status.unwrap_or_default(), run.conclusion))
+        .collect())
 }
 
 fn base64_decode(input: &str) -> Result<Vec<u8>, String> {

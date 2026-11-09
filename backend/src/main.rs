@@ -56,6 +56,7 @@ async fn main() -> anyhow::Result<()> {
         .route("/health", get(api::health))
         .route("/programs", get(api::programs))
         .route("/milestones", get(api::milestones).post(api::create_milestone))
+        .route("/milestones/preview", post(api::preview_graph))
         .route("/milestones/{id}", get(api::milestone_detail))
         .route("/milestones/{id}/submit", post(api::submit_evidence))
         .route("/milestones/{id}/sample", post(api::submit_sample))

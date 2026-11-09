@@ -2,6 +2,10 @@ use crate::config::{ReppoConfig, ReppoMode};
 use crate::domain::ReppoVerdict;
 use reqwest::Client;
 use serde_json::{json, Value};
+use std::time::Duration;
+
+const POLL_INTERVAL: Duration = Duration::from_secs(4);
+const MAX_POLLS: u32 = 28; // ~112s, above the documented 30-90s settle window
 
 pub async fn evaluate(
     cfg: &ReppoConfig,
@@ -15,12 +19,15 @@ pub async fn evaluate(
             "unconfigured",
             "Reppo is not configured. The independent verdict is missing, so assurance is reduced.",
         ),
-        ReppoMode::Sandbox => sandbox(cfg, http, milestone_title, criteria, trace).await,
-        ReppoMode::LiveLite => live_lite(cfg, http, milestone_title, criteria, trace).await,
+        ReppoMode::Sandbox => ReppoVerdict::unavailable(
+            "sandbox",
+            "Reppos sandbox endpoint was retired in the current API. Configure REPPO_CREDIT_TOKEN for a live independent verdict. This node is advisory only and never gates a payment.",
+        ),
+        ReppoMode::LiveLite => live(cfg, http, milestone_title, criteria, trace).await,
     }
 }
 
-async fn live_lite(
+async fn live(
     cfg: &ReppoConfig,
     http: &Client,
     milestone_title: &str,
@@ -34,128 +41,57 @@ async fn live_lite(
         );
     };
 
-    let payload = build_payload(milestone_title, criteria, trace);
-    let url = format!("{}/api/v1/x402/evals/lite", cfg.base_url);
+    let input = format!(
+        "Milestone: {milestone_title}\n\nAcceptance criteria:\n{criteria}\n\nVerification trace (agent output to judge):\n{trace}"
+    );
+    let truncated = input.chars().take(48_000).collect::<String>();
+    let payload = json!({
+        "taskType": "response",
+        "input": truncated,
+    });
+
+    let submit_url = format!("{}/api/v1/x402/evals", cfg.base_url);
     let response = http
-        .post(&url)
+        .post(&submit_url)
         .bearer_auth(token)
-        .timeout(std::time::Duration::from_secs(150))
+        .timeout(Duration::from_secs(30))
         .json(&payload)
         .send()
         .await;
 
-    match response {
-        Ok(response) => {
-            let status = response.status();
-            let raw = response.text().await.unwrap_or_default();
-            if !status.is_success() {
-                return ReppoVerdict {
-                    eval_id: None,
-                    status: "error".into(),
-                    score: None,
-                    decision: None,
-                    confidence: None,
-                    critique: Some(format!(
-                        "Reppo returned HTTP {status}: {}",
-                        raw.chars().take(300).collect::<String>()
-                    )),
-                    mode: "live_lite".into(),
-                };
+    let response = match response {
+        Ok(response) => response,
+        Err(error) => {
+            return ReppoVerdict {
+                eval_id: None,
+                status: "error".into(),
+                score: None,
+                decision: None,
+                confidence: None,
+                critique: Some(format!("Reppo submit failed: {error}")),
+                mode: "live_lite".into(),
             }
-            parse_live(&raw)
         }
-        Err(error) => ReppoVerdict {
+    };
+
+    let status = response.status();
+    let raw = response.text().await.unwrap_or_default();
+    if !status.is_success() {
+        return ReppoVerdict {
             eval_id: None,
             status: "error".into(),
             score: None,
             decision: None,
             confidence: None,
-            critique: Some(format!("Reppo request failed: {error}")),
+            critique: Some(format!(
+                "Reppo returned HTTP {status}: {}",
+                raw.chars().take(300).collect::<String>()
+            )),
             mode: "live_lite".into(),
-        },
+        };
     }
-}
 
-async fn sandbox(
-    cfg: &ReppoConfig,
-    http: &Client,
-    milestone_title: &str,
-    criteria: &str,
-    trace: &str,
-) -> ReppoVerdict {
-    let payload = build_payload(milestone_title, criteria, trace);
-    let url = format!("{}/api/v1/x402/evals/lite", cfg.base_url);
-    let response = http
-        .post(&url)
-        .header("Sandbox", "true")
-        .timeout(std::time::Duration::from_secs(60))
-        .json(&payload)
-        .send()
-        .await;
-
-    match response {
-        Ok(response) => {
-            let status = response.status();
-            let raw = response.text().await.unwrap_or_default();
-            let eval_id = serde_json::from_str::<Value>(&raw)
-                .ok()
-                .and_then(|v| {
-                    v.get("evalId")
-                        .or_else(|| v.get("id"))
-                        .and_then(Value::as_str)
-                        .map(str::to_string)
-                });
-            if !status.is_success() {
-                return ReppoVerdict {
-                    eval_id,
-                    status: "error".into(),
-                    score: None,
-                    decision: None,
-                    confidence: None,
-                    critique: Some(format!(
-                        "Reppo sandbox returned HTTP {status}: {}",
-                        raw.chars().take(300).collect::<String>()
-                    )),
-                    mode: "sandbox".into(),
-                };
-            }
-            ReppoVerdict {
-                eval_id,
-                status: "sandbox".into(),
-                score: Some(0),
-                decision: Some("revise".into()),
-                confidence: Some("placeholder".into()),
-                critique: Some(
-                    "Reppo sandbox mode returns a placeholder verdict. It is shown for integration proof and never gates a payment."
-                        .into(),
-                ),
-                mode: "sandbox".into(),
-            }
-        }
-        Err(error) => ReppoVerdict {
-            eval_id: None,
-            status: "error".into(),
-            score: None,
-            decision: None,
-            confidence: None,
-            critique: Some(format!("Reppo sandbox request failed: {error}")),
-            mode: "sandbox".into(),
-        },
-    }
-}
-
-fn build_payload(milestone_title: &str, criteria: &str, trace: &str) -> Value {
-    let truncated = trace.chars().take(48_000).collect::<String>();
-    json!({
-        "type": "trace",
-        "payload": truncated,
-        "criteria": [criteria.chars().take(1900).collect::<String>()],
-        "context": format!("Milestone: {milestone_title}. This is an acceptance decision for a milestone payment. The verdict must judge whether the submitted evidence supports the claim and the milestone criteria.")
-    })
-}
-
-fn parse_live(raw: &str) -> ReppoVerdict {
-    let parsed: Value = match serde_json::from_str(raw) {
+    let submitted: Value = match serde_json::from_str(&raw) {
         Ok(value) => value,
         Err(error) => {
             return ReppoVerdict {
@@ -169,61 +105,120 @@ fn parse_live(raw: &str) -> ReppoVerdict {
             }
         }
     };
-
-    let eval_id = parsed
-        .get("evalId")
-        .or_else(|| parsed.get("id"))
+    let eval_id = submitted
+        .get("id")
         .and_then(Value::as_str)
         .map(str::to_string);
-    let status = parsed
-        .get("status")
-        .and_then(Value::as_str)
-        .unwrap_or("unknown")
-        .to_ascii_lowercase();
-    let result = parsed.get("result").cloned().unwrap_or(Value::Null);
-    let verdict_obj = result.get("verdict").unwrap_or(&result);
+    let Some(eval_id) = eval_id else {
+        return ReppoVerdict {
+            eval_id: None,
+            status: "error".into(),
+            score: None,
+            decision: None,
+            confidence: None,
+            critique: Some("Reppo submit did not return an evaluation id.".into()),
+            mode: "live_lite".into(),
+        };
+    };
 
-    let score = verdict_obj
+    let poll_url = format!("{}/api/v1/x402/evals/{eval_id}", cfg.base_url);
+    for _ in 0..MAX_POLLS {
+        tokio::time::sleep(POLL_INTERVAL).await;
+        let poll = http
+            .get(&poll_url)
+            .bearer_auth(token)
+            .timeout(Duration::from_secs(30))
+            .send()
+            .await;
+        let raw = match poll {
+            Ok(response) => response.text().await.unwrap_or_default(),
+            Err(_) => continue,
+        };
+        let Ok(value) = serde_json::from_str::<Value>(&raw) else {
+            continue;
+        };
+        let state = value
+            .get("status")
+            .and_then(Value::as_str)
+            .unwrap_or("")
+            .to_ascii_uppercase();
+        match state.as_str() {
+            "COMPLETED" => return parse_completed(&value, &eval_id),
+            "FAILED" => {
+                return ReppoVerdict {
+                    eval_id: Some(eval_id),
+                    status: "failed".into(),
+                    score: None,
+                    decision: None,
+                    confidence: None,
+                    critique: Some("The evaluation failed and was not charged. Resubmit to try again.".into()),
+                    mode: "live_lite".into(),
+                }
+            }
+            _ => continue,
+        }
+    }
+
+    ReppoVerdict {
+        eval_id: Some(eval_id),
+        status: "pending".into(),
+        score: None,
+        decision: None,
+        confidence: None,
+        critique: Some("The evaluation is still queued after ~2 minutes. It was not charged; a refresh will not recover it — resubmit to retry.".into()),
+        mode: "live_lite".into(),
+    }
+}
+
+fn parse_completed(value: &Value, eval_id: &str) -> ReppoVerdict {
+    let result = value.get("result").cloned().unwrap_or(Value::Null);
+    let score = result
         .get("score")
         .and_then(Value::as_i64)
-        .or_else(|| result.get("score").and_then(Value::as_i64));
-    let decision = verdict_obj
+        .or_else(|| value.get("score").and_then(Value::as_i64));
+    let decision = result
         .get("decision")
         .and_then(Value::as_str)
-        .or_else(|| result.get("decision").and_then(Value::as_str))
-        .map(|s| s.to_ascii_lowercase());
-    let confidence = verdict_obj
+        .map(|d| d.to_ascii_lowercase());
+    let confidence = result
         .get("confidence")
         .and_then(Value::as_str)
         .map(str::to_string);
-
+    let route = result
+        .get("route")
+        .and_then(Value::as_str)
+        .map(str::to_string);
     let critique = result
-        .get("critiques")
-        .and_then(Value::as_array)
-        .map(|items| {
-            items
-                .iter()
-                .filter_map(|item| {
-                    item.get("critique")
-                        .or_else(|| item.get("summary"))
-                        .and_then(Value::as_str)
-                })
-                .collect::<Vec<_>>()
-                .join(" ")
-        })
-        .filter(|s| !s.is_empty())
+        .get("reason")
+        .and_then(Value::as_str)
+        .map(str::to_string)
         .or_else(|| {
-            verdict_obj
-                .get("critique")
-                .and_then(Value::as_str)
-                .map(str::to_string)
+            result
+                .get("explain")
+                .and_then(|explain| explain.get("route_reasons"))
+                .and_then(Value::as_array)
+                .map(|items| {
+                    items
+                        .iter()
+                        .filter_map(|item| item.as_str())
+                        .collect::<Vec<_>>()
+                        .join(" ")
+                })
         });
 
     ReppoVerdict {
-        eval_id,
-        status,
+        eval_id: Some(eval_id.to_string()),
+        status: "settled".into(),
         score,
-        decision,
+        decision: match decision.as_deref() {
+            Some("accept") => Some("accept".into()),
+            Some("reject") => Some("reject".into()),
+            _ => match route.as_deref() {
+                Some("ship") => Some("accept".into()),
+                Some("block") => Some("reject".into()),
+                _ => Some("revise".into()),
+            },
+        },
         confidence,
         critique,
         mode: "live_lite".into(),
@@ -235,12 +230,32 @@ mod tests {
     use super::*;
 
     #[test]
-    fn parses_settled_lite_response() {
-        let raw = r#"{"evalId":"eval_1","status":"SETTLED","result":{"score":88,"decision":"accept","confidence":"high","critiques":[{"critique":"Evidence supports the claim."}]}}"#;
-        let verdict = parse_live(raw);
+    fn parses_completed_eval() {
+        let value = json!({
+            "status": "COMPLETED",
+            "result": {
+                "score": 82,
+                "decision": "accept",
+                "confidence": "high",
+                "route": "ship",
+                "reason": "Evidence supports the claim."
+            }
+        });
+        let verdict = parse_completed(&value, "eval_1");
         assert_eq!(verdict.eval_id.as_deref(), Some("eval_1"));
-        assert_eq!(verdict.score, Some(88));
+        assert_eq!(verdict.score, Some(82));
         assert_eq!(verdict.decision.as_deref(), Some("accept"));
         assert!(verdict.accepted_live());
+    }
+
+    #[test]
+    fn block_route_maps_to_reject() {
+        let value = json!({
+            "status": "COMPLETED",
+            "result": {"score": 12, "route": "block", "reason": "Unsupported numbers."}
+        });
+        let verdict = parse_completed(&value, "eval_2");
+        assert_eq!(verdict.decision.as_deref(), Some("reject"));
+        assert!(verdict.rejected());
     }
 }

@@ -56,6 +56,7 @@ function MilestoneInner() {
   const [notice, setNotice] = useState("");
   const [busy, setBusy] = useState<string | null>(null);
   const [showForm, setShowForm] = useState(false);
+  const [operatorToken, setOperatorToken] = useState("");
   const [form, setForm] = useState<Evidence>({
     repo_url: "",
     demo_url: "",
@@ -162,7 +163,11 @@ function MilestoneInner() {
     setBusy("approve");
     setActionError("");
     try {
-      await postJSON(`/api/payments/${detail.payment.id}/approve`);
+      const headers = operatorToken.trim()
+        ? { "X-Operator-Token": operatorToken.trim() }
+        : undefined;
+      await postJSON(`/api/payments/${detail.payment.id}/approve`, undefined, headers);
+      setOperatorToken("");
       await load(true);
     } catch (err) {
       setActionError(err instanceof Error ? err.message : "Could not approve the release.");
@@ -385,8 +390,24 @@ function MilestoneInner() {
                 <div style={{ marginTop: "18px" }}>
                   {!showForm ? (
                     <button className="button ghost" onClick={() => setShowForm(true)}>
-                      Submit a revision
+                      {detail.verdict?.serv.decision === "revise"
+                        ? "Revise and resubmit"
+                        : "Submit a revision"}
                     </button>
+                  ) : null}
+                  {detail.history && detail.history.length > 0 ? (
+                    <div className="notice" style={{ marginTop: "12px" }}>
+                      Previous attempts:{" "}
+                      {detail.history
+                        .map(
+                          (attempt) =>
+                            `${attempt.serv_decision} ${attempt.serv_score}/100 (${attempt.final_decision})`,
+                        )
+                        .join(" → ")}
+                      {detail.history.length > 1
+                        ? `. Latest: ${detail.history[detail.history.length - 1].serv_score}/100. Address the verdict reasons and resubmit to see the score move.`
+                        : ". Each resubmission is scored again; the score history is kept on the receipt."}
+                    </div>
                   ) : null}
                 </div>
               ) : null}
@@ -616,6 +637,19 @@ function MilestoneInner() {
                         did not auto-release it. Approving here settles through{" "}
                         {payment.rail}.
                       </p>
+                      <div className="field">
+                        <label htmlFor="operator-token">
+                          Operator token (if configured)
+                        </label>
+                        <input
+                          id="operator-token"
+                          type="password"
+                          value={operatorToken}
+                          onChange={(e) => setOperatorToken(e.target.value)}
+                          placeholder="X-Operator-Token"
+                          autoComplete="off"
+                        />
+                      </div>
                       <button
                         className="button small"
                         onClick={approve}

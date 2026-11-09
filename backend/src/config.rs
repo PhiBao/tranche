@@ -14,6 +14,7 @@ pub struct Config {
     pub operator_token: Option<String>,
     pub allow_medium_assurance: bool,
     pub allow_fixture_release: bool,
+    pub serv_daily_budget_usd: f64,
 }
 
 #[derive(Clone, Debug)]
@@ -172,6 +173,9 @@ impl Config {
             operator_token: env_opt("OPERATOR_TOKEN"),
             allow_medium_assurance: env_bool("ALLOW_MEDIUM_ASSURANCE", true),
             allow_fixture_release: env_bool("ALLOW_FIXTURE_RELEASE", false),
+            serv_daily_budget_usd: env_or("SERV_DAILY_BUDGET_USD", "2.0")
+                .parse()
+                .unwrap_or(2.0),
         }
     }
 

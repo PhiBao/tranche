@@ -149,6 +149,14 @@ pub fn compile_criteria(criteria: &str) -> AcceptanceGraph {
             hint: None,
         },
         GraphNode {
+            id: "grounded".into(),
+            kind: NodeKind::Script,
+            label: "Numeric claims are grounded in the README".into(),
+            check: Some("claims_grounded".into()),
+            tokens: vec![],
+            hint: None,
+        },
+        GraphNode {
             id: "safety".into(),
             kind: NodeKind::Script,
             label: "Claim is free of reviewer-directed instructions".into(),
@@ -186,6 +194,19 @@ pub fn compile_criteria(criteria: &str) -> AcceptanceGraph {
                 kind: NodeKind::Script,
                 label: "Repository has a recent commit".into(),
                 check: Some("repo_recent_commit".into()),
+                tokens: vec![],
+                hint: None,
+            },
+        );
+    }
+    if lower.contains("ci ") || lower.contains(" ci") || lower.contains("github actions") || lower.contains("checks pass") {
+        nodes.insert(
+            3,
+            GraphNode {
+                id: "ci".into(),
+                kind: NodeKind::Script,
+                label: "CI is green on the latest commit".into(),
+                check: Some("ci_passes".into()),
                 tokens: vec![],
                 hint: None,
             },
@@ -348,7 +369,7 @@ impl AcceptanceGraph {
                 .iter()
                 .filter(|n| n.kind == NodeKind::External)
                 .count(),
-            estimated_review_cost_usd: 0.004,
+            estimated_review_cost_usd: 0.0045,
         }
     }
 }
@@ -371,6 +392,16 @@ mod tests {
     fn adds_commit_check_when_asked() {
         let graph = compile_criteria("Repository must have a commit during the hackathon and a live demo.");
         assert!(graph.nodes.iter().any(|n| n.id == "commit"));
+    }
+
+    #[test]
+    fn adds_grounded_and_ci_nodes() {
+        let graph = compile_criteria("The repo is public and its demo responds. CI must pass on GitHub Actions.");
+        assert!(graph.nodes.iter().any(|n| n.id == "grounded" && n.check.as_deref() == Some("claims_grounded")));
+        assert!(graph.nodes.iter().any(|n| n.id == "ci" && n.check.as_deref() == Some("ci_passes")));
+        let base = compile_criteria("The repo is public and its demo responds.");
+        assert!(base.nodes.iter().any(|n| n.id == "grounded"));
+        assert!(!base.nodes.iter().any(|n| n.id == "ci"));
     }
 
     #[test]

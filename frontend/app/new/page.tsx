@@ -2,8 +2,26 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { postJSON } from "@/lib/api";
+import type { AcceptanceGraph } from "@/lib/types";
+
+interface Preview {
+  graph: AcceptanceGraph;
+  graph_summary: {
+    nodes: number;
+    script_nodes: number;
+    agent_nodes: number;
+    external_nodes: number;
+    estimated_review_cost_usd: number;
+  };
+}
+
+const kindLabel: Record<string, string> = {
+  script: "Script · code",
+  agent: "Agent · SERV",
+  external: "External · Reppo",
+};
 
 export default function NewMilestonePage() {
   const router = useRouter();
@@ -16,6 +34,30 @@ export default function NewMilestonePage() {
   );
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
+  const [preview, setPreview] = useState<Preview | null>(null);
+  const [previewError, setPreviewError] = useState("");
+  const [reviewed, setReviewed] = useState(false);
+
+  useEffect(() => {
+    setReviewed(false);
+    if (criteria.trim().length < 20) {
+      setPreview(null);
+      setPreviewError("");
+      return;
+    }
+    const timer = window.setTimeout(() => {
+      postJSON<Preview>("/api/milestones/preview", { criteria })
+        .then((data) => {
+          setPreview(data);
+          setPreviewError("");
+        })
+        .catch((err: Error) => {
+          setPreview(null);
+          setPreviewError(err.message);
+        });
+    }, 450);
+    return () => window.clearTimeout(timer);
+  }, [criteria]);
 
   async function submit() {
     setBusy(true);
@@ -140,37 +182,71 @@ export default function NewMilestonePage() {
               </div>
 
               <div className="form-actions">
-                <button className="button" onClick={submit} disabled={busy}>
-                  {busy ? "Compiling…" : "Compile and publish"}
+                <button
+                  className="button"
+                  onClick={submit}
+                  disabled={busy || !preview || !reviewed}
+                >
+                  {busy ? "Compiling…" : "Publish approved graph"}
                 </button>
                 <span className="block-note">No funds move on publish.</span>
               </div>
+
+              <label className="review-check">
+                <input
+                  type="checkbox"
+                  checked={reviewed}
+                  onChange={(e) => setReviewed(e.target.checked)}
+                  disabled={!preview}
+                />
+                <span>
+                  I reviewed the compiled acceptance graph and its estimated
+                  review cost before publishing.
+                </span>
+              </label>
+              {!preview && !previewError ? (
+                <div className="hint" style={{ marginTop: "8px" }}>
+                  Compiling the graph from your criteria…
+                </div>
+              ) : null}
+              {previewError ? (
+                <div className="error-box" style={{ marginTop: "12px" }}>
+                  Could not compile the graph: {previewError}
+                </div>
+              ) : null}
             </div>
           </div>
 
           <aside className="detail-rail">
             <div className="rail-block">
-              <div className="rail-label">What the compiler will create</div>
-              <div className="rail-row">
-                <span>01 · Repository</span>
-                <span>Script · public check</span>
-              </div>
-              <div className="rail-row">
-                <span>02 · README</span>
-                <span>Script · required terms</span>
-              </div>
-              <div className="rail-row">
-                <span>03 · Live demo</span>
-                <span>Script · HTTP check</span>
-              </div>
-              <div className="rail-row">
-                <span>04 · Claim</span>
-                <span>Agent · SERV review</span>
-              </div>
-              <div className="rail-row">
-                <span>05 · Independent</span>
-                <span>External · Reppo</span>
-              </div>
+              <div className="rail-label">Compiled graph · review before publish</div>
+              {preview ? (
+                <>
+                  {preview.graph.nodes.map((node, index) => (
+                    <div className="rail-row" key={node.id}>
+                      <span>
+                        {String(index + 1).padStart(2, "0")} · {node.label}
+                      </span>
+                      <span>{kindLabel[node.kind] ?? node.kind}</span>
+                    </div>
+                  ))}
+                  <div className="rail-row">
+                    <span>Estimated review cost</span>
+                    <span className="mono">
+                      ${preview.graph_summary.estimated_review_cost_usd.toFixed(4)}
+                    </span>
+                  </div>
+                  <div className="rail-row">
+                    <span>Script nodes</span>
+                    <span>{preview.graph_summary.script_nodes} · no model cost</span>
+                  </div>
+                </>
+              ) : (
+                <p className="rail-note">
+                  {previewError ||
+                    "The compiled graph appears here as you write the criteria. Nothing is published until you approve it."}
+                </p>
+              )}
             </div>
             <div className="rail-block">
               <div className="rail-label">Policy</div>

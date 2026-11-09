@@ -48,10 +48,14 @@ export async function getJSON<T>(path: string): Promise<T> {
     : new Error("The demo API is waking up. Refresh in a moment.");
 }
 
-export async function postJSON<T>(path: string, body?: unknown): Promise<T> {
+export async function postJSON<T>(
+  path: string,
+  body?: unknown,
+  headers?: Record<string, string>,
+): Promise<T> {
   const response = await fetch(`${BASE}${path}`, {
     method: "POST",
-    headers: { "Content-Type": "application/json" },
+    headers: { "Content-Type": "application/json", ...(headers ?? {}) },
     body: body === undefined ? undefined : JSON.stringify(body),
   });
   return parse<T>(response);

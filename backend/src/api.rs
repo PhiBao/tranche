@@ -139,6 +139,22 @@ async fn build_detail(
         .map_err(internal)?;
     let graph_summary = graph.summary();
 
+    let all_submissions = store::submissions_for(&state.pool, &milestone.id)
+        .await
+        .map_err(internal)?;
+    let mut history = Vec::with_capacity(all_submissions.len());
+    for item in &all_submissions {
+        if let Some(v) = store::verdict_for(&state.pool, &item.id).await.map_err(internal)? {
+            history.push(json!({
+                "submission_id": item.id,
+                "created_at": item.created_at,
+                "serv_decision": v.serv_decision,
+                "serv_score": v.serv_score,
+                "final_decision": v.final_decision,
+            }));
+        }
+    }
+
     Ok(json!({
         "milestone": {
             "id": milestone.id,
@@ -158,6 +174,7 @@ async fn build_detail(
         "graph_summary": graph_summary,
         "sample": sample,
         "submission": submission_json,
+        "history": history,
         "node_runs": node_runs,
         "verdict": verdict,
         "payment": payment,
@@ -190,8 +207,7 @@ pub async fn create_milestone(
 ) -> ApiResult<Value> {
     let title = body.title.trim();
     let criteria = body.criteria.trim();
-    if title.len() < 3 || title.len() > 140 {
-        return Err(ApiError::new(
+    if title.len() < 3 || title.len() > 140 {        return Err(ApiError::new(
             StatusCode::BAD_REQUEST,
             "Title must be 3–140 characters.",
         ));
@@ -268,6 +284,28 @@ pub async fn create_milestone(
     .map_err(internal)?;
 
     Ok(Json(json!({"id": id, "graph": graph})))
+}
+
+#[derive(Debug, Deserialize)]
+pub struct PreviewGraph {
+    pub criteria: String,
+}
+
+/// Compiles criteria into an acceptance graph without publishing it.
+/// The operator reviews this graph before any work is submitted.
+pub async fn preview_graph(Json(body): Json<PreviewGraph>) -> ApiResult<Value> {
+    let criteria = body.criteria.trim();
+    if criteria.len() < 20 || criteria.len() > 4000 {
+        return Err(ApiError::new(
+            StatusCode::BAD_REQUEST,
+            "Criteria must be 20–4000 characters.",
+        ));
+    }
+    let graph = compile_criteria(criteria);
+    Ok(Json(json!({
+        "graph": graph,
+        "graph_summary": graph.summary(),
+    })))
 }
 
 #[derive(Debug, Deserialize)]

@@ -237,6 +237,18 @@ pub async fn payment_for(
     .await
 }
 
+pub async fn submissions_for(
+    pool: &SqlitePool,
+    milestone_id: &str,
+) -> Result<Vec<SubmissionRow>, sqlx::Error> {
+    sqlx::query_as::<_, SubmissionRow>(
+        "SELECT * FROM submissions WHERE milestone_id = ? ORDER BY created_at ASC, rowid ASC",
+    )
+    .bind(milestone_id)
+    .fetch_all(pool)
+    .await
+}
+
 pub async fn get_payment(pool: &SqlitePool, id: &str) -> Result<Option<PaymentRow>, sqlx::Error> {
     sqlx::query_as::<_, PaymentRow>("SELECT * FROM payments WHERE id = ?")
         .bind(id)

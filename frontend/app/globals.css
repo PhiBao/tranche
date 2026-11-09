@@ -1749,6 +1749,24 @@ ol {
   margin-bottom: 14px;
 }
 
+.review-check {
+  display: flex;
+  gap: 10px;
+  align-items: flex-start;
+  margin-top: 16px;
+  padding-top: 14px;
+  border-top: 1px solid var(--rule);
+  font-size: 12px;
+  line-height: 1.45;
+  color: var(--ink-soft);
+  cursor: pointer;
+}
+
+.review-check input {
+  margin-top: 2px;
+  accent-color: var(--green);
+}
+
 .sample-box {
   display: flex;
   justify-content: space-between;

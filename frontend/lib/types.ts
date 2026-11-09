@@ -145,6 +145,13 @@ export interface MilestoneDetail {
     evidence_hash: string;
     created_at: string;
   } | null;
+  history: Array<{
+    submission_id: string;
+    created_at: string;
+    serv_decision: string;
+    serv_score: number;
+    final_decision: string;
+  }>;
   node_runs: NodeRun[];
   verdict: VerdictView | null;
   payment: PaymentView | null;
