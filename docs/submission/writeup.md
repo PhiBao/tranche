@@ -3,7 +3,8 @@
 **Track:** Kite
 **One line:** Proof-gated milestone payments. Pay when it's proven.
 **Live demo:** https://tranche-serv.fly.dev
-**Released receipt:** https://tranche-serv.fly.dev/receipt/?slug=sz8xmpe69pdr
+**Kite-settled receipt:** https://tranche-serv.fly.dev/receipt/?slug=c6ac72kq2rc4
+**Kite settlement tx:** https://basescan.org/tx/0xe5f507ebceb3ca54f78ba5815b9e069e0703c022bd96a8426c2e570016bea301
 **Blocked receipt:** https://tranche-serv.fly.dev/receipt/?slug=afbq4eejfzhb
 **Repository:** https://github.com/PhiBao/tranche
 **Demo video:** _to be recorded_
@@ -53,10 +54,17 @@ payment reference, and records the returned reference on the receipt. The operat
 sets a tranche amount and an auto-release ceiling; above the ceiling a human must
 approve, and a blocked payment can never be approved.
 
-The public demo runs a **labeled demo ledger** because live Passport settlement
-requires the operator's passkey and a funded USDC.e wallet. The UI never calls the
-ledger "Kite"; the adapter is `scripts/kite_payout.sh` and the setup is documented
-in the README. The deployed demo runs both SERV Reasoning and the Reppo Evaluation API live.
+The deployed app has executed a real payout: **0.10 USDC on Base** from the
+Passport wallet to the builder wallet, approved with a passkey and recorded as
+[`0xe5f507…ea301`](https://basescan.org/tx/0xe5f507ebceb3ca54f78ba5815b9e069e0703c022bd96a8426c2e570016bea301).
+The receipt is public:
+[`c6ac72kq2rc4`](https://tranche-serv.fly.dev/receipt/?slug=c6ac72kq2rc4).
+
+Self-serve milestones run a **labeled demo ledger** because every live Passport
+payout requires the operator's passkey and a funded wallet. The UI never calls
+the ledger "Kite"; the adapter is `scripts/kite_payout.sh`, the status check is
+`scripts/kite_status.sh`, and the setup is documented in the README. The
+deployed demo runs both SERV Reasoning and the Reppo Evaluation API live.
 
 ## What was built during the hackathon
 
@@ -83,6 +91,7 @@ distribution channel, and each public receipt is a shareable proof artifact.
 ## What is real vs. labeled
 
 The README contains the full table. In short: script checks, hashes, policy,
-receipts, and the console are real; SERV Reasoning and the Reppo Evaluation API
-run live on the deployed demo; settlement is Kite Passport when configured (with
-a passkey approval step) and a labeled demo ledger otherwise.
+receipts, the console, and one Kite Passport settlement on Base are real; SERV
+Reasoning and the Reppo Evaluation API run live on the deployed demo; self-serve
+settlement is a labeled demo ledger because each Passport payout needs the
+operator's passkey.

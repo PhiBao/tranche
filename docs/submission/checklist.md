@@ -8,10 +8,12 @@ Deadline: **2026-11-15 23:59 UTC**.
 - [x] Live demo: https://tranche-serv.fly.dev
 - [x] Live SERV Reasoning (`serv` in `/api/health` reports `live`)
 - [x] Reppo live lite verdicts (credit token funded and set as a Fly secret)
-- [x] Labeled demo ledger (Kite Passport adapter ready; live settlement requires
-      the operator's passkey and a funded wallet)
+- [x] Live Kite Passport settlement: 0.10 USDC on Base,
+      tx `0xe5f507ebceb3ca54f78ba5815b9e069e0703c022bd96a8426c2e570016bea301`
+      ([receipt](https://tranche-serv.fly.dev/receipt/?slug=c6ac72kq2rc4))
+- [x] Labeled demo ledger for self-serve runs (Passport needs the operator passkey)
 - [x] Four seeded milestones: release, blocked, over-ceiling, injection
-- [x] Public receipts for released and blocked submissions
+- [x] Public receipts for the Kite-settled release and the blocked submissions
 - [x] README, architecture diagram, lifecycle diagram, security model
 - [x] Favicon and product mark
 - [x] Cold-start retry and a scale-to-zero Fly configuration
@@ -28,6 +30,7 @@ Deadline: **2026-11-15 23:59 UTC**.
 
 - [ ] Record a 2–3 minute demo using `docs/submission/demo-script.md`.
 - [ ] Capture the X post from `docs/submission/x-post.md` with:
+  - the Kite-settled receipt (`docs/screenshots/live-receipt-kite.png`),
   - the blocked-payment receipt (`docs/screenshots/live-receipt-blocked.png`),
   - the live release room (`docs/screenshots/live-milestone-released.png`),
   - the architecture diagram (`docs/diagrams/architecture.png`).
@@ -42,8 +45,8 @@ Deadline: **2026-11-15 23:59 UTC**.
 ## Final verification
 
 - [ ] Run `scripts/smoke.sh https://tranche-serv.fly.dev`.
-- [ ] Open the live release receipt and the live blocked receipt in a private
-      browser window.
+- [ ] Open the live Kite-settled receipt (`c6ac72kq2rc4`), the BaseScan tx, and
+      the live blocked receipt in a private browser window.
 - [ ] Re-run the reference sample once to confirm the release path after any
       infrastructure change.
 - [ ] Confirm the demo still works after the machine has been idle (cold start).
@@ -52,6 +55,8 @@ Deadline: **2026-11-15 23:59 UTC**.
 ## Known limitations to disclose
 
 - Reppo live verdicts consume prepaid credits; if the balance runs out the UI labels the node and holds the payment.
-- Settlement is the labeled demo ledger, not a live Kite transfer.
+- Self-serve demo settlement is the labeled ledger. One real Kite Passport
+  settlement on Base is linked on the receipt; each additional live payout needs
+  the operator passkey.
 - No user accounts or per-IP rate limiting on the public demo.
 - Evidence is public URLs and text; no builder signatures or private repos.

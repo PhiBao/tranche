@@ -12,8 +12,9 @@ Built for **SERV Hackathon 02** — Kite track. Deadline: November 15, 2026.
 - **Live demo:** <https://tranche-serv.fly.dev>
 - **Release room:** <https://tranche-serv.fly.dev/console/>
 - **Blocked-payment demo:** <https://tranche-serv.fly.dev/milestone/?id=ms_blocked>
+- **Live Kite-settled receipt:** <https://tranche-serv.fly.dev/receipt/?slug=c6ac72kq2rc4>
+- **Kite settlement tx (BaseScan):** <https://basescan.org/tx/0xe5f507ebceb3ca54f78ba5815b9e069e0703c022bd96a8426c2e570016bea301>
 - **Live blocked receipt:** <https://tranche-serv.fly.dev/receipt/?slug=afbq4eejfzhb>
-- **Live released receipt:** <https://tranche-serv.fly.dev/receipt/?slug=sz8xmpe69pdr>
 - **Repository:** this repository (public at submission time)
 
 The public demo scales to zero when idle. The first request can take 5–10 seconds
@@ -126,10 +127,15 @@ Open <https://tranche-serv.fly.dev/console/>. Four seeded milestones are availab
 
 Every page labels the engine mode and the payment rail. Nothing simulated is
 presented as live. The deployed demo runs SERV Reasoning **live** and Reppo
-**live** (independent verdict); settlement is the labeled **demo ledger**. The
-Kite Passport adapter is implemented with a passkey approval URL and a separate
-status check; it requires the operator's passkey and a funded wallet to settle
-for real.
+**live** (independent verdict). Its self-serve milestones use the labeled
+**demo ledger** so anyone can run a sample end to end. The Kite Passport rail is
+live as well: the deployed app created a 0.10 USDC payout on Base, the operator
+approved it with a passkey, and the settlement was recorded on-chain — receipt
+[`c6ac72kq2rc4`](https://tranche-serv.fly.dev/receipt/?slug=c6ac72kq2rc4),
+transaction
+[`0xe5f5…ea301`](https://basescan.org/tx/0xe5f507ebceb3ca54f78ba5815b9e069e0703c022bd96a8426c2e570016bea301).
+A Passport payout is two-phase: the app creates an approval request, and only a
+signed send is reported as settled.
 
 ![The release room after a live SERV verdict](docs/screenshots/live-milestone-released.png)
 
@@ -145,7 +151,7 @@ for real.
 | Public receipt | **Real** | Generated from the persisted trace; excluded from any mocked path |
 | SERV Reasoning | **Live** when `SERV_API_KEY` is set | Calls `inference-api.openserv.ai` with PromptGuard + Shadow Agent. Without a key, a deterministic **fixture** evaluator runs and is labeled `FIXTURE`; fixture verdicts cannot release funds (`ALLOW_FIXTURE_RELEASE=false`). |
 | Reppo Evaluation API | **Live lite** when `REPPO_CREDIT_TOKEN` is set | Submits the claim + evidence to `/api/v1/x402/evals`, polls for a settled verdict, and records score/decision/confidence/critique. Without a token, `sandbox` is a labeled advisory (no network call); without either, `unconfigured`. |
-| Settlement | **Kite Passport** when `KITE_MODE=passport` and `KITE_PAYOUT_COMMAND` is set | Runs the configured Passport payout command with the amount, recipient, and reference. Otherwise the **demo ledger** is used; it records a settlement reference but makes no on-chain transfer, and the UI says `demo ledger`. |
+| Settlement | **Kite Passport** (live proof) / **demo ledger** (self-serve) | In Passport mode, `scripts/kite_payout.sh` creates a `kpass wallet send`, the operator approves with a passkey, and `scripts/kite_status.sh` records the tx. One real settlement is on Base: `0xe5f507ebceb3ca54f78ba5815b9e069e0703c022bd96a8426c2e570016bea301`. The self-serve demo uses the ledger, which records a settlement reference but makes no on-chain transfer; the UI says `demo ledger`. |
 | Seeded evidence | **Sample** | Public real URLs (`openserv-labs/sdk`, `openserv.ai/hackathon-2`), submitted as demo data; not a claim of authorship by the demo builder |
 
 ## 6. Hackathon relevance
@@ -169,10 +175,10 @@ Tranche is the acceptance layer for Kite-powered agent payments:
   `KITE_STATUS_COMMAND=/app/scripts/kite_status.sh`,
   `KITE_RECIPIENT_ADDRESS=<builder address>`, and set `OPERATOR_TOKEN`. Approve
   the held payment through the operator API/UI with the token.
-- The demo uses the **ledger** rail because a real Passport session requires the
-  operator's passkey and a funded USDC.e wallet. The UI never calls the ledger
-  "Kite"; it says `demo ledger`. The Passport path is implemented as an adapter,
-  not simulated inside the product.
+- The demo uses the **ledger** rail for self-serve milestones because every real
+  Passport payout requires the operator's passkey and a funded USDC wallet. The
+  live proof is a real 0.10 USDC Base transaction settled by the deployed app
+  (`0xe5f5…ea301`); the UI never calls the ledger "Kite", it says `demo ledger`.
 
 **SERV Reasoning integration.** Every agent node uses the public SERV API with a
 system prompt, low reasoning effort, structured JSON output, `serv_prompt_guard`,
@@ -388,7 +394,10 @@ Restart the backend to reseed the four milestones.
 ### Current limitations
 
 - **Kite Passport** has no public HTTP API yet; the integration is a CLI payout
-  adapter. A native session-creation flow with passkey approval is the next step.
+  adapter, so each payout needs an operator passkey approval. A native session
+  flow with per-tranche caps is the next step. The adapter has settled a real
+  0.10 USDC payout on Base
+  (`0xe5f507ebceb3ca54f78ba5815b9e069e0703c022bd96a8426c2e570016bea301`).
 - **Reppo lite** costs 440 credits per evaluation (about $0.22) and needs a
   funded Base wallet. The public demo runs it live; the settlement window is
   usually 30–90 seconds, so the payment is held if the verdict has not settled.
@@ -397,7 +406,8 @@ Restart the backend to reseed the four milestones.
   a v3 graph endpoint.
 - Evidence is limited to public URLs and text. There are no file uploads, private
   repositories, or cryptographic signatures from the builder.
-- The demo ledger is not on-chain. The receipt labels it as a ledger reference.
+- The self-serve demo ledger is not on-chain; its receipt labels the reference.
+  The Kite proof receipt is a real Base transaction, linked to BaseScan.
 - The verifier can check whether a claim is supported by public evidence; it
   cannot prove authorship or judge subjective quality beyond the published
   criteria.

@@ -120,7 +120,7 @@ async fn run_payout_command(
                     ),
                 };
             }
-            parse_payout_output(&stdout)
+            parse_payout_output(&stdout, &cfg.chain)
         }
     }
 }
@@ -132,7 +132,7 @@ mod tests {
     #[test]
     fn pending_passport_send_is_not_treated_as_settled() {
         let out = r#"{"status":"human_action_required","request_id":"req_123","approval_url":"https://agentpassport.ai/approve/req_123"}"#;
-        let settlement = parse_payout_output(out);
+        let settlement = parse_payout_output(out, "base");
         assert_eq!(settlement.status, "pending_approval");
         assert_eq!(settlement.session_ref.as_deref(), Some("req_123"));
         assert!(settlement.approval_url.is_some());
@@ -142,14 +142,26 @@ mod tests {
     #[test]
     fn completed_passport_send_records_tx() {
         let out = r#"{"status":"success","transactionHash":"0xabc123","explorer_url":"https://basescan.org/tx/0xabc123"}"#;
-        let settlement = parse_payout_output(out);
+        let settlement = parse_payout_output(out, "base");
         assert_eq!(settlement.status, "settled");
         assert_eq!(settlement.tx_ref.as_deref(), Some("0xabc123"));
         assert!(settlement.explorer_url.is_some());
     }
+
+    #[test]
+    fn hash_only_passport_send_gets_a_base_explorer_link() {
+        let hash = "0xe5f507ebceb3ca54f78ba5815b9e069e0703c022bd96a8426c2e570016bea301";
+        let out = format!(r#"{{"status":"success","transaction_hash":"{hash}"}}"#);
+        let settlement = parse_payout_output(&out, "base");
+        assert_eq!(settlement.status, "settled");
+        assert_eq!(
+            settlement.explorer_url.as_deref(),
+            Some("https://basescan.org/tx/0xe5f507ebceb3ca54f78ba5815b9e069e0703c022bd96a8426c2e570016bea301")
+        );
+    }
 }
 
-fn parse_payout_output(stdout: &str) -> Settlement {
+fn parse_payout_output(stdout: &str, chain: &str) -> Settlement {
     let receipt: serde_json::Value =
         serde_json::from_str(stdout).unwrap_or(serde_json::Value::Null);
     let approval_url = receipt
@@ -195,18 +207,34 @@ fn parse_payout_output(stdout: &str) -> Settlement {
                 Some(stdout.lines().next().unwrap_or("").to_string())
             }
         });
+    let explorer_url = receipt
+        .get("explorer_url")
+        .and_then(serde_json::Value::as_str)
+        .map(str::to_string)
+        .or_else(|| tx_ref.as_deref().and_then(|tx| explorer_for(chain, tx)));
     Settlement {
         rail: "kite_passport".into(),
         status: "settled".into(),
         tx_ref,
-        explorer_url: receipt
-            .get("explorer_url")
-            .and_then(serde_json::Value::as_str)
-            .map(str::to_string),
+        explorer_url,
         session_ref: request_id,
         approval_url: None,
         note: "Settled through the configured Kite Agent Passport payout command.".into(),
     }
+}
+
+/// Best-effort explorer link when the payout command only returns a hash.
+fn explorer_for(chain: &str, tx_ref: &str) -> Option<String> {
+    if tx_ref.len() != 66 || !tx_ref.starts_with("0x") {
+        return None;
+    }
+    let base = match chain.to_ascii_lowercase().as_str() {
+        "base" => "https://basescan.org/tx/",
+        "polygon" => "https://polygonscan.com/tx/",
+        "avalanche" => "https://snowtrace.io/tx/",
+        _ => return None,
+    };
+    Some(format!("{base}{tx_ref}"))
 }
 
 /// Polls the configured Kite status command for a pending payout.
@@ -263,7 +291,7 @@ pub async fn poll_status(cfg: &KiteConfig, request_id: &str) -> Settlement {
                     ),
                 };
             }
-            let mut parsed = parse_payout_output(&stdout);
+            let mut parsed = parse_payout_output(&stdout, &cfg.chain);
             if parsed.status == "pending_approval" {
                 parsed.session_ref = Some(request_id.into());
             }

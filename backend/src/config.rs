@@ -68,6 +68,7 @@ pub enum KiteMode {
 #[derive(Clone, Debug)]
 pub struct KiteConfig {
     pub mode: KiteMode,
+    pub chain: String,
     pub payee: Option<String>,
     pub payout_command: Option<String>,
     pub status_command: Option<String>,
@@ -167,6 +168,7 @@ impl Config {
             },
             kite: KiteConfig {
                 mode: kite_mode,
+                chain: env_or("KITE_CHAIN", "base"),
                 payee: env_opt("KITE_PAYEE"),
                 payout_command: env_opt("KITE_PAYOUT_COMMAND"),
                 status_command: env_opt("KITE_STATUS_COMMAND"),

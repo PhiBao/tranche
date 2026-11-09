@@ -311,6 +311,11 @@ export default function HomePage() {
             <span>Kite: Agent Passport</span>
             <span>GitHub: public repo checks</span>
           </div>
+          <p className="rail-note" style={{ marginTop: "12px" }}>
+            <a className="text-link" href="/receipt/?slug=c6ac72kq2rc4">
+              Live Kite settlement receipt — 0.10 USDC on Base ↗
+            </a>
+          </p>
         </div>
       </section>
 

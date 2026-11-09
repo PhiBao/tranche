@@ -17,7 +17,7 @@ Click **Open console** → **Bounty — Kite Passport checkout**.
 
 Scroll the acceptance graph.
 
-> "The operator writes the criteria in plain English. Tranche compiles six typed
+> "The operator writes the criteria in plain English. Tranche compiles seven typed
 > nodes before any work is submitted: script checks that cost nothing, a safety
 > screen for reviewer-directed instructions, a SERV judgment, and an independent
 > Reppo verdict. The builder can see exactly what will be checked."
@@ -32,8 +32,8 @@ Narrate as nodes complete:
 
 Pause on the red node and the verdict.
 
-> "SERV rejects the claim. Reppo has no verdict because the evidence already
-> failed. The policy blocks the payment. Zero USDC moved."
+> "SERV rejects the claim. Reppo's independent verdict rejects it too. The
+> policy blocks the payment. Zero USDC moved."
 
 Open the public receipt.
 
@@ -51,14 +51,30 @@ Show the SERV panel, then the Reppo panel, then the payment stamp.
 
 > "SERV accepts. Reppo's independent verdict also accepts, with high confidence.
 > The amount is at the operator's ceiling and assurance is high, so the policy
-> releases it. Settlement is the labeled demo ledger in the public build."
+> releases it. This self-serve run settles on the labeled demo ledger."
 
 Click **Open public receipt**, show the graph hash, evidence hash, settlement
 reference.
 
 > "The receipt is public. The builder can share it; the operator can audit it."
 
-## 1:50 — The ceiling
+## 1:35 — The real Kite settlement
+
+Open the Kite-settled receipt: `/receipt/?slug=c6ac72kq2rc4`.
+
+> "The same deployed app also settled a real tranche through Kite Passport:
+> 0.10 USDC on Base, from the Passport wallet to the builder wallet, approved
+> with a passkey. The receipt records the transaction hash and links to BaseScan.
+> The Passport payout is two-phase — the app creates the approval request, and
+> only a signed send is ever marked settled."
+
+Show the BaseScan transaction briefly:
+
+> "BaseScan confirms the transfer. The self-serve demo uses the labeled ledger
+> because every live payout needs the operator's passkey; the rail is never
+> mislabeled."
+
+## 2:00 — The ceiling
 
 Go to **Grant tranche — independent review** → **Run seeded sample**.
 
@@ -70,7 +86,7 @@ Click **Approve release**. Show the receipt's `review → released`.
 > "The model cannot move money. The ceiling is code, and the approval is a
 > deliberate operator action."
 
-## 2:15 — The close
+## 2:20 — The close
 
 Return to the console.
 
@@ -88,4 +104,5 @@ Return to the console.
 - If Reppo is still queued, use the `Refresh verdict` button on the milestone page.
   If the credit balance is exhausted, say so on camera; never imply a live
   verdict when the UI says otherwise.
-- If the demo ledger is used, say "demo ledger" on camera. Do not call it Kite.
+- If a self-serve run uses the demo ledger, say "demo ledger" on camera. Do not
+  call it Kite. The `c6ac72kq2rc4` receipt is the real Kite settlement.

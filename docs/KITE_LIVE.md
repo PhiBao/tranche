@@ -1,18 +1,33 @@
 # Live Kite Passport settlement — operator runbook
 
-The public demo currently uses the **labeled demo ledger**. The Kite Passport
-path is implemented end-to-end; the only remaining prerequisite is an operator
-passkey on the Passport account.
+**Status: completed.** The deployed app settled a real 0.10 USDC payout on Base
+through Kite Passport. The public self-serve demo now runs the labeled ledger;
+the live proof remains available at
+<https://tranche-serv.fly.dev/receipt/?slug=c6ac72kq2rc4>.
 
-## Current state
+## Completed live settlement
+
+- Milestone: `ms_9137b9edc58b453fae0468ec476b700e` — “Kite Passport live settlement”
+- Amount: **0.10 USDC** on Base
+- From: `0x2f0E613BaF0e6148C29695f8480981e7970a55DD` (Passport wallet)
+- To: `0xDbFe5c4d0256D2459bB216caB905999Ca41bE349` (demo builder wallet)
+- Request: `wallet_send_req_01a1c2bb-fe2e-7bc7-9e4b-2aaffbaa36d8`
+- Transaction: [`0xe5f507ebceb3ca54f78ba5815b9e069e0703c022bd96a8426c2e570016bea301`](https://basescan.org/tx/0xe5f507ebceb3ca54f78ba5815b9e069e0703c022bd96a8426c2e570016bea301)
+- Receipt: <https://tranche-serv.fly.dev/receipt/?slug=c6ac72kq2rc4>
+- Verdict: SERV accept, Reppo accept (100, settled), assurance high
+
+The payout was created by the deployed app (`POST /api/payments/.../approve`),
+approved with the operator passkey, then finalized with
+`POST /api/payments/.../kite-status`. The backend recorded the tx only after
+`kpass wallet send-status` returned success.
+
+## Accounts and wallet
 
 - Passport account: `kiter0211@gmail.com`
 - Passport wallet: `0x2f0E613BaF0e6148C29695f8480981e7970a55DD`
-- Funded balance: 5.00 USDC on Base (for the demo)
 - Builder payout address: `0xDbFe5c4d0256D2459bB216caB905999Ca41bE349`
 - `kpass` 6.13.1 is installed in the Fly image and logged in through the
   `KITE_CONFIG_JSON` secret.
-- The wallet send currently returns `passkey registration is required`.
 
 ## 1. Create the passkey
 

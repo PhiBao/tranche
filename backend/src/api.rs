@@ -11,6 +11,17 @@ use crate::integrations::github;
 use crate::store;
 use crate::AppState;
 
+/// The receipt and milestone pages report the rail that actually handled the
+/// payment, not the current global setting. A historical Kite receipt must not
+/// look like a ledger payment after the demo is switched back to ledger mode.
+fn engine_report_for(state: &AppState, payment: Option<&store::PaymentRow>) -> Value {
+    let mut engines = state.cfg.engine_report();
+    if let (Some(payment), Some(obj)) = (payment, engines.as_object_mut()) {
+        obj.insert("payment_rail".into(), json!(payment.rail));
+    }
+    engines
+}
+
 #[derive(Debug)]
 pub struct ApiError {
     status: StatusCode,
@@ -180,7 +191,7 @@ async fn build_detail(
         "payment": payment,
         "receipt_slug": receipt_slug,
         "events": events,
-        "engines": state.cfg.engine_report(),
+        "engines": engine_report_for(&state, payment.as_ref()),
         "public_base_url": state.cfg.public_base_url,
         "policy": {
             "auto_release_ceiling_cents": milestone.ceiling_cents,
@@ -958,7 +969,7 @@ pub async fn receipt_detail(
             "created_at": v.created_at,
         })),
         "payment": payment,
-        "engines": state.cfg.engine_report(),
+        "engines": engine_report_for(&state, payment.as_ref()),
         "public_base_url": state.cfg.public_base_url,
     })))
 }
