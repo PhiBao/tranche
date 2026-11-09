@@ -9,3 +9,5 @@ data/
 *.log
 .DS_Store
 *.tsbuildinfo
+
+.operator-token

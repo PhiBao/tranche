@@ -16,7 +16,8 @@ if [ -z "${TRANCHE_REQUEST_ID:-}" ]; then
   exit 2
 fi
 
-kpass wallet send-status \
+KPASS_NO_BROWSER=1 kpass wallet send-status \
+  --no-interactive \
   --request-id "$TRANCHE_REQUEST_ID" \
   --wait \
   --timeout "${KITE_APPROVAL_TIMEOUT_SECONDS:-30}" \

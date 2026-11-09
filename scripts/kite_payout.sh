@@ -34,7 +34,8 @@ print(f"{cents / 100:.2f}")
 PY
 )"
 
-kpass wallet send \
+KPASS_NO_BROWSER=1 kpass wallet send \
+  --no-interactive \
   --chain "${KITE_CHAIN:-base}" \
   --to "$KITE_RECIPIENT_ADDRESS" \
   --amount "$amount" \
