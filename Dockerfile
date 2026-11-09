@@ -19,13 +19,15 @@ RUN touch src/main.rs && cargo build --release
 
 FROM debian:bookworm-slim
 RUN apt-get update \
-    && apt-get install -y --no-install-recommends ca-certificates \
+    && apt-get install -y --no-install-recommends ca-certificates curl jq \
+    && curl -fsSL https://cli.gokite.ai/install.sh | bash \
     && rm -rf /var/lib/apt/lists/*
+ENV PATH="/root/.local/bin:${PATH}"
 WORKDIR /app
 COPY --from=backend /app/target/release/tranche ./tranche
 COPY --from=frontend /app/frontend/out ./frontend/out
 COPY scripts ./scripts
-RUN chmod +x ./scripts/kite_payout.sh && mkdir -p /data
+RUN chmod +x ./scripts/kite_payout.sh ./scripts/kite_status.sh ./scripts/entry.sh && mkdir -p /data
 ENV BIND_ADDR=0.0.0.0:8080 \
     DATABASE_URL=sqlite:///data/tranche.db?mode=rwc \
     DATABASE_MAX_CONNECTIONS=5 \
@@ -37,4 +39,4 @@ ENV BIND_ADDR=0.0.0.0:8080 \
     ALLOW_FIXTURE_RELEASE=false
 EXPOSE 8080
 VOLUME ["/data"]
-CMD ["./tranche"]
+ENTRYPOINT ["/app/scripts/entry.sh"]
