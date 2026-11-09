@@ -156,16 +156,18 @@ Tranche is the acceptance layer for Kite-powered agent payments:
 - The operator controls the tranche amount and the **auto-release ceiling**.
   Above the ceiling, a human must approve; a blocked payment can never be
   approved.
-- The settlement adapter is the Kite Passport seam. In Passport mode it invokes a
-  configured `kpass` payout command with `TRANCHE_AMOUNT_CENTS`,
-  `TRANCHE_CURRENCY`, `TRANCHE_RECIPIENT`, and `TRANCHE_PAYMENT_ID`. The receipt
-  records the returned reference. A working example is
-  [`scripts/kite_payout.sh`](scripts/kite_payout.sh); set
-  `KITE_PAYOUT_COMMAND=/app/scripts/kite_payout.sh` and
-  `KITE_RECIPIENT_ADDRESS` in the operator environment.
-- To turn on live settlement: install the Passport CLI, sign in, fund the wallet,
-  set `KITE_MODE=passport`, set `KITE_PAYOUT_COMMAND`, set `OPERATOR_TOKEN`, and
-  approve the held payment through the operator API with the token.
+- The settlement adapter is the Kite Passport seam. In Passport mode,
+  `scripts/kite_payout.sh` creates a `kpass wallet send` request and returns the
+  passkey approval URL. The release room shows that link and a `Check approval`
+  action; `KITE_STATUS_COMMAND=scripts/kite_status.sh` polls the signed send,
+  records the transaction hash/explorer link, and only then marks the payment
+  settled. A pending approval is never reported as settled.
+- To turn on live settlement: install the Passport CLI, sign in and create a
+  passkey, fund the Passport wallet, set `KITE_MODE=passport`,
+  `KITE_PAYOUT_COMMAND=/app/scripts/kite_payout.sh`,
+  `KITE_STATUS_COMMAND=/app/scripts/kite_status.sh`,
+  `KITE_RECIPIENT_ADDRESS=<builder address>`, and set `OPERATOR_TOKEN`. Approve
+  the held payment through the operator API/UI with the token.
 - The demo uses the **ledger** rail because a real Passport session requires the
   operator's passkey and a funded USDC.e wallet. The UI never calls the ledger
   "Kite"; it says `demo ledger`. The Passport path is implemented as an adapter,

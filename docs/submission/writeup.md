@@ -83,7 +83,6 @@ distribution channel, and each public receipt is a shareable proof artifact.
 ## What is real vs. labeled
 
 The README contains the full table. In short: script checks, hashes, policy,
-receipts, and the console are real; SERV is live when a key is configured and
-labeled `FIXTURE` otherwise; Reppo is live lite with a credit token, labeled
-`sandbox` otherwise; settlement is Kite Passport when configured and a labeled
-demo ledger otherwise.
+receipts, and the console are real; SERV Reasoning and the Reppo Evaluation API
+run live on the deployed demo; settlement is Kite Passport when configured (with
+a passkey approval step) and a labeled demo ledger otherwise.
