@@ -59,7 +59,7 @@ export function EngineStrip() {
             ? "API offline"
             : engines
               ? engines.reppo === "live_lite"
-                ? "live · $0.05 lite"
+                ? "live · x402 credits"
                 : engines.reppo === "sandbox"
                   ? "sandbox verdict"
                   : "not configured"
