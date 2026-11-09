@@ -12,8 +12,8 @@ Built for **SERV Hackathon 02** — Kite track. Deadline: November 15, 2026.
 - **Live demo:** <https://tranche-serv.fly.dev>
 - **Release room:** <https://tranche-serv.fly.dev/console/>
 - **Blocked-payment demo:** <https://tranche-serv.fly.dev/milestone/?id=ms_blocked>
-- **Live blocked receipt:** <https://tranche-serv.fly.dev/receipt/?slug=dfqn6yhkg2pe>
-- **Live released receipt:** <https://tranche-serv.fly.dev/receipt/?slug=72q7s2w6vwmr>
+- **Live blocked receipt:** <https://tranche-serv.fly.dev/receipt/?slug=afbq4eejfzhb>
+- **Live released receipt:** <https://tranche-serv.fly.dev/receipt/?slug=sz8xmpe69pdr>
 - **Repository:** this repository (public at submission time)
 
 The public demo scales to zero when idle. The first request can take 5–10 seconds
@@ -125,8 +125,8 @@ Open <https://tranche-serv.fly.dev/console/>. Four seeded milestones are availab
    failed safety check.
 
 Every page labels the engine mode and the payment rail. Nothing simulated is
-presented as live. The deployed demo runs SERV Reasoning **live**; Reppo is in
-**sandbox** mode (placeholder verdict, never gates); settlement is the labeled
+presented as live. The deployed demo runs SERV Reasoning **live** and Reppo
+**live** (x402 credits, independent verdict); settlement is the labeled
 **demo ledger**. The Kite Passport adapter is implemented but requires the
 operator's passkey and a funded wallet to settle for real.
 
@@ -143,7 +143,7 @@ operator's passkey and a funded wallet to settle for real.
 | Release policy | **Real** | Enforced in Rust; the model has no settlement authority |
 | Public receipt | **Real** | Generated from the persisted trace; excluded from any mocked path |
 | SERV Reasoning | **Live** when `SERV_API_KEY` is set | Calls `inference-api.openserv.ai` with PromptGuard + Shadow Agent. Without a key, a deterministic **fixture** evaluator runs and is labeled `FIXTURE`; fixture verdicts cannot release funds (`ALLOW_FIXTURE_RELEASE=false`). |
-| Reppo Evaluation API | **Live lite** when `REPPO_CREDIT_TOKEN` is set | Calls the x402 lite endpoint and settles inline. Without a token, `sandbox` returns a labeled placeholder. Without either, the node is `unconfigured`. |
+| Reppo Evaluation API | **Live lite** when `REPPO_CREDIT_TOKEN` is set | Submits the claim + evidence to `/api/v1/x402/evals`, polls for a settled verdict, and records score/decision/confidence/critique. Without a token, `sandbox` is a labeled advisory (no network call); without either, `unconfigured`. |
 | Settlement | **Kite Passport** when `KITE_MODE=passport` and `KITE_PAYOUT_COMMAND` is set | Runs the configured Passport payout command with the amount, recipient, and reference. Otherwise the **demo ledger** is used; it records a settlement reference but makes no on-chain transfer, and the UI says `demo ledger`. |
 | Seeded evidence | **Sample** | Public real URLs (`openserv-labs/sdk`, `openserv.ai/hackathon-2`), submitted as demo data; not a claim of authorship by the demo builder |
 
@@ -287,7 +287,7 @@ Edit `backend/.env`:
 
 ```dotenv
 SERV_API_KEY=...              # required for live judgment
-REPPO_CREDIT_TOKEN=...        # optional: live inline Reppo lite verdicts
+REPPO_CREDIT_TOKEN=...        # required for live independent verdicts (x402 prepaid credits)
 GITHUB_TOKEN=...              # optional: raises GitHub rate limits
 KITE_MODE=ledger              # demo ledger; use passport + a payout command for live
 ALLOW_FIXTURE_RELEASE=false   # keep false; a simulated verdict must not release funds
@@ -386,10 +386,9 @@ Restart the backend to reseed the four milestones.
 
 - **Kite Passport** has no public HTTP API yet; the integration is a CLI payout
   adapter. A native session-creation flow with passkey approval is the next step.
-- **Reppo lite** costs $0.05 per evaluation and needs a funded Base wallet. The
-  public demo shows a labeled sandbox or unconfigured node unless a credit token
-  is supplied. The standard API path settles in 10+ minutes and is not used for
-  the inline demo.
+- **Reppo lite** costs 440 credits per evaluation (about $0.22) and needs a
+  funded Base wallet. The public demo runs it live; the settlement window is
+  usually 30–90 seconds, so the payment is held if the verdict has not settled.
 - **SERV v3 Graph Sharding** is in beta. Tranche applies the script/decision/agent
   split at the application layer on the public v2 API; it does not claim to call
   a v3 graph endpoint.

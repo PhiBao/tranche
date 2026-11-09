@@ -11,7 +11,7 @@ primary_region = "iad"
   PUBLIC_BASE_URL = "https://tranche-serv.fly.dev"
   REPPO_MODE = "live"
   KITE_MODE = "ledger"
-  ALLOW_MEDIUM_ASSURANCE = "true"
+  ALLOW_MEDIUM_ASSURANCE = "false"
   ALLOW_FIXTURE_RELEASE = "false"
 
 [[mounts]]

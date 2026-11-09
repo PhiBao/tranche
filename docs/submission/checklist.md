@@ -7,7 +7,7 @@ Deadline: **2026-11-15 23:59 UTC**.
 - [x] Public repository: https://github.com/PhiBao/tranche
 - [x] Live demo: https://tranche-serv.fly.dev
 - [x] Live SERV Reasoning (`serv` in `/api/health` reports `live`)
-- [x] Reppo sandbox labeled (live lite requires a credit token)
+- [x] Reppo live lite verdicts (credit token funded and set as a Fly secret)
 - [x] Labeled demo ledger (Kite Passport adapter ready; live settlement requires
       the operator's passkey and a funded wallet)
 - [x] Four seeded milestones: release, blocked, over-ceiling, injection
@@ -51,7 +51,7 @@ Deadline: **2026-11-15 23:59 UTC**.
 
 ## Known limitations to disclose
 
-- Reppo is in sandbox mode on the public demo (placeholder verdict, never gates).
+- Reppo live verdicts consume prepaid credits; if the balance runs out the UI labels the node and holds the payment.
 - Settlement is the labeled demo ledger, not a live Kite transfer.
 - No user accounts or per-IP rate limiting on the public demo.
 - Evidence is public URLs and text; no builder signatures or private repos.

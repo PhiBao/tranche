@@ -49,9 +49,9 @@ Go back → **Reference build — proof-gated release** → **Run seeded sample*
 
 Show the SERV panel, then the Reppo panel, then the payment stamp.
 
-> "SERV accepts. If Reppo is in live mode, its independent verdict also accepts.
-> The amount is at the operator's ceiling, so the policy releases it. In the
-> public demo Reppo is a labeled sandbox, and the UI says that too."
+> "SERV accepts. Reppo's independent verdict also accepts, with high confidence.
+> The amount is at the operator's ceiling and assurance is high, so the policy
+> releases it. Settlement is the labeled demo ledger in the public build."
 
 Click **Open public receipt**, show the graph hash, evidence hash, settlement
 reference.
@@ -85,7 +85,7 @@ Return to the console.
 - Pre-run the blocked and reference flows once so the database has receipts.
 - If SERV is slow, the page shows node status live; do not cut the wait, it is the
   product.
-- If Reppo is not configured, say so on camera and show the `sandbox` or
-  `not configured` label. Never imply a live independent verdict when there is
-  none.
+- If Reppo is still queued, use the `Refresh verdict` button on the milestone page.
+  If the credit balance is exhausted, say so on camera; never imply a live
+  verdict when the UI says otherwise.
 - If the demo ledger is used, say "demo ledger" on camera. Do not call it Kite.
