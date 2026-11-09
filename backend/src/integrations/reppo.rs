@@ -5,7 +5,7 @@ use serde_json::{json, Value};
 use std::time::Duration;
 
 const POLL_INTERVAL: Duration = Duration::from_secs(4);
-const MAX_POLLS: u32 = 28; // ~112s, above the documented 30-90s settle window
+const MAX_POLLS: u32 = 45; // ~180s, above the documented 30-90s settle window
 
 pub async fn evaluate(
     cfg: &ReppoConfig,
@@ -167,6 +167,42 @@ async fn live(
         confidence: None,
         critique: Some("The evaluation is still queued after ~2 minutes. It was not charged; a refresh will not recover it — resubmit to retry.".into()),
         mode: "live_lite".into(),
+    }
+}
+
+/// One-shot poll for a previously submitted evaluation. Used by the refresh
+/// endpoint when a verdict was still queued at the end of the inline window.
+pub async fn poll_once(cfg: &ReppoConfig, http: &Client, eval_id: &str) -> Option<ReppoVerdict> {
+    let Some(token) = cfg.credit_token.as_deref() else {
+        return None;
+    };
+    let url = format!("{}/api/v1/x402/evals/{eval_id}", cfg.base_url);
+    let response = http
+        .get(&url)
+        .bearer_auth(token)
+        .timeout(Duration::from_secs(30))
+        .send()
+        .await
+        .ok()?;
+    let raw = response.text().await.ok()?;
+    let value: Value = serde_json::from_str(&raw).ok()?;
+    let state = value
+        .get("status")
+        .and_then(Value::as_str)
+        .unwrap_or("")
+        .to_ascii_uppercase();
+    match state.as_str() {
+        "COMPLETED" => Some(parse_completed(&value, eval_id)),
+        "FAILED" => Some(ReppoVerdict {
+            eval_id: Some(eval_id.to_string()),
+            status: "failed".into(),
+            score: None,
+            decision: None,
+            confidence: None,
+            critique: Some("The evaluation failed and was not charged.".into()),
+            mode: "live_lite".into(),
+        }),
+        _ => None,
     }
 }
 

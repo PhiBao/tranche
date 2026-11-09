@@ -1,0 +1,12 @@
+{
+  "name": "tranche-x402-credits",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "dependencies": {
+    "@x402/axios": "^2.30.0",
+    "@x402/evm": "^2.30.0",
+    "axios": "^1.7.0",
+    "viem": "^2.21.0"
+  }
+}

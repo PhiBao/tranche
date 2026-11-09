@@ -651,6 +651,92 @@ pub async fn approve_payment(
     })))
 }
 
+pub async fn refresh_reppo(
+    State(state): State<AppState>,
+    Path(id): Path<String>,
+) -> ApiResult<Value> {
+    let milestone = store::get_milestone(&state.pool, &id)
+        .await
+        .map_err(|_| ApiError::new(StatusCode::NOT_FOUND, "Milestone not found"))?;
+    let submission = store::latest_submission(&state.pool, &milestone.id)
+        .await
+        .map_err(internal)?
+        .ok_or_else(|| ApiError::new(StatusCode::NOT_FOUND, "No submission for this milestone"))?;
+    let verdict = store::verdict_for(&state.pool, &submission.id)
+        .await
+        .map_err(internal)?
+        .ok_or_else(|| ApiError::new(StatusCode::NOT_FOUND, "No verdict yet"))?;
+    if verdict.reppo_mode != "live_lite" {
+        return Err(ApiError::new(
+            StatusCode::BAD_REQUEST,
+            "Reppo is not in live mode for this verdict.",
+        ));
+    }
+    let Some(eval_id) = verdict.reppo_eval_id.as_deref() else {
+        return Err(ApiError::new(StatusCode::BAD_REQUEST, "No Reppo eval id is stored."));
+    };
+    let Some(reppo) = crate::integrations::reppo::poll_once(&state.cfg.reppo, &state.http, eval_id).await
+    else {
+        return Ok(Json(json!({"status": "pending"})));
+    };
+
+    let assurance = if verdict.serv_engine == "serv_live" && reppo.status == "settled" {
+        "high"
+    } else if verdict.serv_engine == "serv_live" {
+        "medium"
+    } else {
+        "low"
+    };
+    let final_decision = if reppo.rejected() { "bounce" } else { &verdict.final_decision };
+
+    sqlx::query(
+        "UPDATE verdicts SET reppo_status = ?, reppo_score = ?, reppo_decision = ?, reppo_confidence = ?, reppo_critique = ?, assurance = ?, final_decision = ? WHERE id = ?",
+    )
+    .bind(&reppo.status)
+    .bind(reppo.score)
+    .bind(reppo.decision.as_deref())
+    .bind(reppo.confidence.as_deref())
+    .bind(reppo.critique.as_deref())
+    .bind(assurance)
+    .bind(final_decision)
+    .bind(&verdict.id)
+    .execute(&state.pool)
+    .await
+    .map_err(internal)?;
+
+    if reppo.rejected() {
+        sqlx::query("UPDATE payments SET status = 'blocked', note = 'No funds moved. The independent Reppo verdict rejected the submission.' WHERE submission_id = ? AND status = 'held'")
+            .bind(&submission.id)
+            .execute(&state.pool)
+            .await
+            .map_err(internal)?;
+        store::set_state(&state.pool, &milestone.id, "bounced")
+            .await
+            .map_err(internal)?;
+        executor::ensure_receipt(&state, &submission.id, &milestone.id)
+            .await
+            .map_err(internal)?;
+    } else {
+        store::add_event(
+            &state.pool,
+            &milestone.id,
+            "reppo_settled",
+            "The independent Reppo verdict arrived. The payment remains held for operator approval.",
+        )
+        .await
+        .map_err(internal)?;
+    }
+
+    Ok(Json(json!({
+        "status": reppo.status,
+        "decision": reppo.decision,
+        "score": reppo.score,
+        "confidence": reppo.confidence,
+        "critique": reppo.critique,
+        "assurance": assurance,
+    })))
+}
+
 pub async fn receipt_detail(
     State(state): State<AppState>,
     Path(slug): Path<String>,

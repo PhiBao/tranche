@@ -6,10 +6,10 @@ primary_region = "iad"
 
 [env]
   BIND_ADDR = "0.0.0.0:8080"
-  DATABASE_URL = "sqlite:///data/tranche-v3.db?mode=rwc"
+  DATABASE_URL = "sqlite:///data/tranche-v4.db?mode=rwc"
   FRONTEND_DIR = "/app/frontend/out"
   PUBLIC_BASE_URL = "https://tranche-serv.fly.dev"
-  REPPO_MODE = "sandbox"
+  REPPO_MODE = "live"
   KITE_MODE = "ledger"
   ALLOW_MEDIUM_ASSURANCE = "true"
   ALLOW_FIXTURE_RELEASE = "false"

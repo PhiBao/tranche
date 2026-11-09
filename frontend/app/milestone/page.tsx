@@ -140,8 +140,7 @@ function MilestoneInner() {
     }
   }
 
-  async function verifyExisting() {
-    if (!detail?.submission) return;
+  async function verifyExisting() {    if (!detail?.submission) return;
     setBusy("verify");
     setActionError("");
     try {
@@ -154,8 +153,20 @@ function MilestoneInner() {
     }
   }
 
-  async function approve() {
-    if (!detail?.payment) return;
+  async function refreshReppo() {
+    setBusy("refresh");
+    setActionError("");
+    try {
+      await postJSON(`/api/milestones/${id}/refresh`);
+      await load(true);
+    } catch (err) {
+      setActionError(err instanceof Error ? err.message : "Could not refresh the Reppo verdict.");
+    } finally {
+      setBusy(null);
+    }
+  }
+
+  async function approve() {    if (!detail?.payment) return;
     const ok = window.confirm(
       "Approve this held release? The settlement rail will be instructed immediately.",
     );
@@ -567,6 +578,20 @@ function MilestoneInner() {
                         {detail.verdict.reppo.mode === "sandbox"
                           ? "Sandbox verdict. It is a placeholder and never gates a payment."
                           : "Reppo is not configured. Assurance is reduced and the release policy accounts for it."}
+                      </div>
+                    ) : null}
+                    {detail.verdict.reppo.status === "pending" ? (
+                      <div className="engine-note">
+                        Reppo is still evaluating. The payment is held; refresh when the
+                        independent verdict lands.{" "}
+                        <button
+                          className="button small ghost"
+                          onClick={refreshReppo}
+                          disabled={busy !== null}
+                          style={{ marginTop: "8px" }}
+                        >
+                          {busy === "refresh" ? "Checking…" : "Refresh verdict"}
+                        </button>
                       </div>
                     ) : null}
                   </div>
