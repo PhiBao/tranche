@@ -27,12 +27,8 @@ if [ -z "${KITE_RECIPIENT_ADDRESS:-}" ]; then
   exit 2
 fi
 
-amount="$(python3 - <<'PY'
-import os
-cents = int(os.environ["TRANCHE_AMOUNT_CENTS"])
-print(f"{cents / 100:.2f}")
-PY
-)"
+cents="${TRANCHE_AMOUNT_CENTS:?TRANCHE_AMOUNT_CENTS is required}"
+amount="$(printf '%d.%02d' $((cents / 100)) $((cents % 100)))"
 
 KPASS_NO_BROWSER=1 kpass wallet send \
   --no-interactive \
