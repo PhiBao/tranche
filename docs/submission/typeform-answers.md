@@ -10,11 +10,15 @@ track. Replace anything in brackets before submitting.
 **1. What's your full name?**
 Phi Bao
 
+(Use your legal name if it differs.)
+
 **2. What's your email address?**
 kiter0211@gmail.com
 
 **3. Are you new to building with OpenServ?**
 No
+
+(If this is your first OpenServ build, answer Yes instead.)
 
 **4. Which track are you submitting to?**
 Kite
@@ -46,7 +50,7 @@ Base, plus blocked receipts where SERV and Reppo both rejected padded and
 injected claims and zero funds moved. The self-serve demo uses a labeled ledger
 because every Kite payout needs the operator passkey.
 
-Two-minute walkthrough:
+1:41 walkthrough:
 https://github.com/PhiBao/tranche/raw/main/docs/submission/tranche-demo.mp4
 
 **8. Share the URL for your project, such as a demo, website, or GitHub repository.**
