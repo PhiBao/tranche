@@ -1,0 +1,31 @@
+Live Kite Passport settlement — verified proof
+
+Network          Base mainnet (chain id 8453)
+Token            USDC 0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913
+From             0x2f0E613BaF0e6148C29695f8480981e7970a55DD  (Kite Passport wallet)
+To               0xDbFe5c4d0256D2459bB216caB905999Ca41bE349  (demo builder wallet)
+Amount           0.10 USDC
+Transaction      0xe5f507ebceb3ca54f78ba5815b9e069e0703c022bd96a8426c2e570016bea301
+Block            55390565
+Status           success
+Explorer         https://basescan.org/tx/0xe5f507ebceb3ca54f78ba5815b9e069e0703c022bd96a8426c2e570016bea301
+
+Milestone        ms_9137b9edc58b453fae0468ec476b700e
+Receipt          https://tranche-serv.fly.dev/receipt/?slug=c6ac72kq2rc4
+Payment          pay_29c3d16a004e4af095458516afd88106
+Rail             kite_passport
+Kite request     wallet_send_req_01a1c2bb-fe2e-7bc7-9e4b-2aaffbaa36d8
+
+Verdict          SERV accept 98/100
+                 Reppo accept 100/100, settled, high confidence
+Assurance        high
+Final decision   release
+
+This transfer was created by the deployed Tranche app after the acceptance
+graph, SERV, Reppo, and the Rust policy gate all passed. The operator approved
+the Passport request with a passkey, and the backend recorded the transaction
+only after `kpass wallet send-status` returned `success`.
+
+The public self-serve demo currently uses the labeled ledger rail because every
+live Passport payout requires the operator's passkey. The receipt above is a
+real Base transaction and is linked from the landing page and README.

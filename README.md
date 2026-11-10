@@ -441,6 +441,7 @@ Restart the backend to reseed the four milestones.
 - `docs/SECURITY.md` — threat model, controls, and residual risks.
 - `docs/submission/writeup.md` — short write-up for the submission form.
 - `docs/submission/x-post.md` — public X post draft.
+- `docs/submission/live-proof.txt` — verified Kite transaction, addresses, and receipt.
 - `docs/submission/demo-script.md` — 2–3 minute demo script.
 - `docs/submission/tranche-demo.mp4` — recorded 2-minute walkthrough (synthetic voiceover).
 - `docs/diagrams/architecture.html` and `state-machine.html` — editable diagrams.
