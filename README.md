@@ -106,7 +106,7 @@ The product primitive is **payment conditioned on multi-layer proof**, not
 
 Open <https://tranche-serv.fly.dev/console/>. Five seeded milestones are available.
 
-Watch the 2-minute walkthrough: [`docs/submission/tranche-demo.mp4`](docs/submission/tranche-demo.mp4)
+Watch the 100-second walkthrough: [`docs/submission/tranche-demo.mp4`](docs/submission/tranche-demo.mp4)
 (synthetic voiceover generated from `docs/submission/demo-script.md`).
 
 1. **Bounty — Kite Passport checkout** — click `Run seeded sample`. The demo URL
@@ -442,8 +442,11 @@ Restart the backend to reseed the four milestones.
 - `docs/submission/writeup.md` — short write-up for the submission form.
 - `docs/submission/x-post.md` — public X post draft.
 - `docs/submission/live-proof.txt` — verified Kite transaction, addresses, and receipt.
+- `docs/submission/typeform-answers.md` — copy-paste answers for the submission form.
+- `docs/submission/tranche-logo.png` — 1024×1024 project mark for the form upload.
 - `docs/submission/demo-script.md` — 2–3 minute demo script.
-- `docs/submission/tranche-demo.mp4` — recorded 2-minute walkthrough (synthetic voiceover).
+- `docs/submission/tranche-demo.mp4` — recorded 1:41 walkthrough (synthetic voiceover).
+- `docs/submission/tranche-demo.srt` — subtitle sidecar for the walkthrough.
 - `docs/diagrams/architecture.html` and `state-machine.html` — editable diagrams.
 - `docs/diagrams/*.png` — exported diagrams used above.
 

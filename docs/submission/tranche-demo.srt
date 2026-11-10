@@ -1,0 +1,140 @@
+1
+00:00:00,050 --> 00:00:02,395
+An agent can move money in seconds.
+
+2
+00:00:02,395 --> 00:00:05,501
+The harder question is whether the work was actually done.
+
+3
+00:00:05,501 --> 00:00:10,759
+Tranche turns a milestone into a test the agent has to pass before it
+gets paid.
+
+4
+00:00:11,370 --> 00:00:14,515
+The useful part of a payment demo is the refusal.
+
+5
+00:00:14,515 --> 00:00:18,844
+A claim can look finished while the demo link is dead or the numbers
+are made up.
+
+6
+00:00:18,844 --> 00:00:21,460
+Someone has to check before the money leaves.
+
+7
+00:00:22,089 --> 00:00:26,009
+The release room lists every milestone and every decision.
+
+8
+00:00:26,009 --> 00:00:27,658
+Two bounties were blocked.
+
+9
+00:00:27,658 --> 00:00:29,126
+Two releases settled.
+
+10
+00:00:29,126 --> 00:00:32,490
+The small one settled through Kite Passport, on Base.
+
+11
+00:00:33,129 --> 00:00:35,140
+Here is a milestone that passed.
+
+12
+00:00:35,140 --> 00:00:40,772
+The repository is public, the demo responds, and the claim matches the
+links.
+
+13
+00:00:40,772 --> 00:00:42,292
+SERV reads the claim.
+
+14
+00:00:42,292 --> 00:00:44,676
+Reppo evaluates it independently.
+
+15
+00:00:44,676 --> 00:00:47,899
+Both accept, and the policy releases the tranche.
+
+16
+00:00:48,509 --> 00:00:49,838
+This is the settlement.
+
+17
+00:00:49,838 --> 00:00:52,801
+Ten cents, real money, on Base.
+
+18
+00:00:52,801 --> 00:00:57,054
+The receipt shows the rail, the amount, and the transaction hash.
+
+19
+00:00:57,054 --> 00:01:03,871
+The payout was created by the app, approved with a passkey, and
+recorded only after the signed send came back.
+
+20
+00:01:04,489 --> 00:01:05,664
+Now the refusal.
+
+21
+00:01:05,664 --> 00:01:09,039
+This claim says the demo works and the numbers are real.
+
+22
+00:01:09,039 --> 00:01:11,359
+The link returns a 404.
+
+23
+00:01:11,359 --> 00:01:13,266
+The numbers are not in the README.
+
+24
+00:01:13,266 --> 00:01:14,581
+SERV rejects it.
+
+25
+00:01:14,581 --> 00:01:16,152
+Reppo rejects it too.
+
+26
+00:01:16,152 --> 00:01:19,323
+Zero dollars moved, and the receipt says why.
+
+27
+00:01:19,939 --> 00:01:21,989
+The policy also has a ceiling.
+
+28
+00:01:21,989 --> 00:01:25,418
+This tranche is five hundred dollars, above the limit.
+
+29
+00:01:25,418 --> 00:01:28,909
+Even with a passing verdict, the payment waits for a human.
+
+30
+00:01:28,909 --> 00:01:31,706
+The model never gets to move money on its own.
+
+31
+00:01:32,340 --> 00:01:35,524
+Tranche is the acceptance layer for agent payments.
+
+32
+00:01:35,524 --> 00:01:36,877
+The agent can pay.
+
+33
+00:01:36,877 --> 00:01:38,875
+The proof decides whether it should.
+
+34
+00:01:38,875 --> 00:01:40,163
+Pay when it's proven.
+

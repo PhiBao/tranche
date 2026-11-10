@@ -28,11 +28,11 @@ Deadline: **2026-11-15 23:59 UTC**.
 
 ## Submission artifacts
 
-- [x] Record a 2-minute demo: `docs/submission/tranche-demo.mp4`
+- [x] Record a 1:41 demo: `docs/submission/tranche-demo.mp4`
       (synthetic voiceover; re-record with your own voice if preferred).
 - [ ] Capture the X post from `docs/submission/x-post.md` with:
   - the Kite-settled receipt (`docs/screenshots/live-receipt-kite.png`),
-  - the 2-minute walkthrough (`docs/submission/tranche-demo.mp4`),
+  - the 1:41 walkthrough (`docs/submission/tranche-demo.mp4`),
   - the blocked-payment receipt (`docs/screenshots/live-receipt-blocked.png`),
   - the live release room (`docs/screenshots/live-milestone-released.png`),
   - the architecture diagram (`docs/diagrams/architecture.png`).

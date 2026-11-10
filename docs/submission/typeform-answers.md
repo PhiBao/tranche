@@ -118,7 +118,7 @@ Yes, I agree to receive updates.
 >
 > The useful part is the refusal.
 >
-> I built **Tranche** for the @openservai SERV Hackathon 02 — Kite track.
+> I built **Tranche** for the @openservai SERV Hackathon 02, Kite track.
 >
 > A milestone rubric becomes an executable acceptance graph: code checks → SERV
 > Reasoning → an independent @reppo verdict → a Rust policy gate → @GoKiteAI

@@ -4,7 +4,7 @@
 >
 > The useful part is the refusal.
 >
-> I built **Tranche** for the @openservai SERV Hackathon 02 — Kite track.
+> I built **Tranche** for the @openservai SERV Hackathon 02, Kite track.
 >
 > A milestone rubric becomes an executable acceptance graph: code checks → SERV
 > Reasoning → an independent @reppo verdict → a Rust policy gate → @GoKiteAI
@@ -23,8 +23,9 @@
 
 ## Posting notes
 
-- Attach the Kite-settled receipt (`docs/screenshots/live-receipt-kite.png`), the
-  blocked-payment receipt, and the architecture diagram.
+- Attach the 1:41 walkthrough (`docs/submission/tranche-demo.mp4`), the
+  Kite-settled receipt, and the blocked-payment receipt. The architecture
+  diagram is optional.
 - Tag @openservai, @GoKiteAI, and @reppo. Add @dphnAI only if a Dolphin-specific
   claim is made (the current build is Kite-track).
 - The post must link to the live demo and the public repository.
