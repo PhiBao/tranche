@@ -111,7 +111,9 @@ token and a funded, least-privilege wallet.
 - No cryptographic builder identity.
 - No multi-tenant authorization model.
 - No formal verification of the policy engine.
-- The demo ledger is not an on-chain settlement.
+- The self-serve demo ledger is not an on-chain settlement. The Kite proof
+  receipt is a real Base transaction; that does not imply every demo release is
+  on-chain.
 
 ## Reporting
 

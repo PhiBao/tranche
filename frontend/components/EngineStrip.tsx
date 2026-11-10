@@ -10,7 +10,7 @@ function Dot({ tone }: { tone: Dot }) {
   return <span className={`dot dot-${tone}`} aria-hidden="true" />;
 }
 
-export function EngineStrip() {
+export function EngineStrip({ paymentRail }: { paymentRail?: string }) {
   const [health, setHealth] = useState<HealthResponse | null>(null);
   const [failed, setFailed] = useState(false);
 
@@ -29,6 +29,7 @@ export function EngineStrip() {
   }, []);
 
   const engines = health?.engines;
+  const rail = paymentRail ?? engines?.payment_rail;
 
   return (
     <div className="engine-strip" aria-live="polite">
@@ -74,7 +75,7 @@ export function EngineStrip() {
               failed
                 ? "off"
                 : engines
-                  ? engines.payment_rail === "kite_passport"
+                  ? rail === "kite_passport"
                     ? "live"
                     : "warn"
                   : "warn"
@@ -83,7 +84,7 @@ export function EngineStrip() {
           {failed
             ? "API offline"
             : engines
-              ? engines.payment_rail === "kite_passport"
+              ? rail === "kite_passport"
                 ? "Kite Passport"
                 : "demo ledger"
               : "checking"}

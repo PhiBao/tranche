@@ -834,6 +834,7 @@ pub async fn kite_status(
             "No Kite approval request id is stored for this payment.",
         ));
     };
+    let previous_status = payment.status.clone();
     let settlement = crate::payments::poll_status(&state.cfg.kite, request_id).await;
     sqlx::query(
         "UPDATE payments SET status = ?, tx_ref = ?, explorer_url = ?, session_ref = ?, approval_url = ?, note = ? WHERE id = ?",
@@ -864,15 +865,17 @@ pub async fn kite_status(
         executor::ensure_receipt(&state, &payment.submission_id, &milestone.id)
             .await
             .map_err(internal)?;
-        store::add_event(
-            &state.pool,
-            &milestone.id,
-            "payment_released",
-            "Kite Passport approval completed; funds settled.",
-        )
-        .await
-        .map_err(internal)?;
-    } else if settlement.status == "failed" {
+        if previous_status != "settled" {
+            store::add_event(
+                &state.pool,
+                &milestone.id,
+                "payment_released",
+                "Kite Passport approval completed; funds settled.",
+            )
+            .await
+            .map_err(internal)?;
+        }
+    } else if settlement.status == "failed" && previous_status != "failed" {
         store::set_state(&state.pool, &milestone.id, "needs_review")
             .await
             .map_err(internal)?;

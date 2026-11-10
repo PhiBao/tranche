@@ -60,8 +60,8 @@ Submissions close **2026-11-15 23:59 UTC**. Build period started 2026-11-02.
 - [x] Rust backend (Axum, SQLx, SQLite) + 24 tests
 - [x] Next.js frontend + static export served by the Rust binary
 - [x] SERV Reasoning live integration (PromptGuard, Shadow Agent, structured verdict)
-- [x] Reppo Evaluation API integration (labeled sandbox in the public demo)
-- [x] Kite Passport payout adapter + labeled demo ledger
+- [x] Reppo Evaluation API integration (live on the public demo)
+- [x] Kite Passport payout adapter, a live 0.10 USDC Base settlement, and a labeled self-serve ledger
 - [x] Seeded demo: release, blocked, injection, over-ceiling
 - [x] Public proof receipts + live deployed demo
 - [x] README, architecture/lifecycle diagrams, security model, screenshots

@@ -798,7 +798,7 @@ function MilestoneInner() {
         </div>
 
         <div style={{ marginTop: "24px" }}>
-          <EngineStrip />
+          <EngineStrip paymentRail={detail?.engines.payment_rail} />
         </div>
       </div>
     </div>
