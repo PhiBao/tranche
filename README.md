@@ -137,7 +137,7 @@ transaction
 A Passport payout is two-phase: the app creates an approval request, and only a
 signed send is reported as settled.
 
-![The release room after a live SERV verdict](docs/screenshots/live-milestone-released.png)
+![The live Kite-settled receipt — 0.10 USDC on Base](docs/screenshots/live-receipt-kite.png)
 
 ### What is real vs. labeled
 
@@ -180,16 +180,20 @@ Tranche is the acceptance layer for Kite-powered agent payments:
   live proof is a real 0.10 USDC Base transaction settled by the deployed app
   (`0xe5f5…ea301`); the UI never calls the ledger "Kite", it says `demo ledger`.
 
+![The live Kite milestone, settled with a passkey](docs/screenshots/live-milestone-kite.png)
+
 **SERV Reasoning integration.** Every agent node uses the public SERV API with a
 system prompt, low reasoning effort, structured JSON output, `serv_prompt_guard`,
 and `serv_shadow_agent`. The UI shows the SERV engine, model, decision, score,
 reasons, latency, and per-node cost. The graph itself is compiled in Rust; the
 model does not choose which checks exist. The deployed demo runs this path live.
 
-**Reppo integration.** The verification trace is submitted to the Reppo
-Evaluation API as a `trace` with the milestone criteria. The returned score,
-decision, confidence, critique, and eval id are persisted and shown separately
-from SERV. Reppo is never used as decoration or as a second self-check.
+**Reppo integration.** The claim and the full evidence bundle are submitted to
+the Reppo Evaluation API with `taskType: "claim"`; Reppo judges whether the
+evidence supports the claim. The returned score, decision, confidence, critique,
+and eval id are persisted and shown separately from SERV. Reppo is never used as
+decoration or as a second self-check. The deployed demo runs this path live
+(roughly 30–90 seconds per evaluation).
 
 **Judging criteria.**
 
