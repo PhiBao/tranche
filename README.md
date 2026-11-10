@@ -104,7 +104,10 @@ The product primitive is **payment conditioned on multi-layer proof**, not
 
 ## 5. The demo (judge quickstart)
 
-Open <https://tranche-serv.fly.dev/console/>. Four seeded milestones are available.
+Open <https://tranche-serv.fly.dev/console/>. Five seeded milestones are available.
+
+Watch the 2-minute walkthrough: [`docs/submission/tranche-demo.mp4`](docs/submission/tranche-demo.mp4)
+(synthetic voiceover generated from `docs/submission/demo-script.md`).
 
 1. **Bounty — Kite Passport checkout** — click `Run seeded sample`. The demo URL
    returns 404. Script node 3 fails, SERV rejects, and the payment is stamped
@@ -117,13 +120,16 @@ Open <https://tranche-serv.fly.dev/console/>. Four seeded milestones are availab
    the UI labels it and assurance drops to medium.
 3. **Grant tranche — independent review** — the same passing evidence, but the
    tranche is above the auto-release ceiling. The payment is held. Click
-   `Approve release` to run the operator path; the receipt shows
-   `review → released`.
+   `Approve release` (operator token required) to run the operator path; the
+   receipt shows `review → released`.
 4. **Bounty — hostile README** — a claim that contains instructions aimed at the
    reviewer. A deterministic safety node catches the reviewer-directed pattern
    before the policy can release, and the receipt records the marker without
    executing it. SERV and Reppo still run; their verdicts cannot override the
    failed safety check.
+5. **Kite Passport live settlement** — the real 0.10 USDC Base payout, already
+   released. Open it to inspect the acceptance trace, both verdicts, the
+   `kite_passport` rail, and the BaseScan reference.
 
 Every page labels the engine mode and the payment rail. Nothing simulated is
 presented as live. The deployed demo runs SERV Reasoning **live** and Reppo
@@ -436,6 +442,7 @@ Restart the backend to reseed the four milestones.
 - `docs/submission/writeup.md` — short write-up for the submission form.
 - `docs/submission/x-post.md` — public X post draft.
 - `docs/submission/demo-script.md` — 2–3 minute demo script.
+- `docs/submission/tranche-demo.mp4` — recorded 2-minute walkthrough (synthetic voiceover).
 - `docs/diagrams/architecture.html` and `state-machine.html` — editable diagrams.
 - `docs/diagrams/*.png` — exported diagrams used above.
 

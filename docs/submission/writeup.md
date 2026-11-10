@@ -7,7 +7,7 @@
 **Kite settlement tx:** https://basescan.org/tx/0xe5f507ebceb3ca54f78ba5815b9e069e0703c022bd96a8426c2e570016bea301
 **Blocked receipt:** https://tranche-serv.fly.dev/receipt/?slug=afbq4eejfzhb
 **Repository:** https://github.com/PhiBao/tranche
-**Demo video:** _to be recorded_
+**Demo video:** `docs/submission/tranche-demo.mp4` (2:02 walkthrough, synthetic voiceover)
 
 ## The problem
 
