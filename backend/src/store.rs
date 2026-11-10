@@ -281,12 +281,26 @@ pub async fn events_for(
     pool: &SqlitePool,
     milestone_id: &str,
 ) -> Result<Vec<EventRow>, sqlx::Error> {
-    sqlx::query_as::<_, EventRow>(
+    let rows = sqlx::query_as::<_, EventRow>(
         "SELECT * FROM events WHERE milestone_id = ? ORDER BY created_at ASC, rowid ASC LIMIT 50",
     )
     .bind(milestone_id)
     .fetch_all(pool)
-    .await
+    .await?;
+
+    // Status polling is idempotent, but older rows may still contain the same
+    // event twice. Collapse consecutive identical events for display; the raw
+    // rows stay in the database for audit.
+    let mut events: Vec<EventRow> = Vec::with_capacity(rows.len());
+    for row in rows {
+        let duplicate = events
+            .last()
+            .map_or(false, |prev| prev.kind == row.kind && prev.message == row.message);
+        if !duplicate {
+            events.push(row);
+        }
+    }
+    Ok(events)
 }
 
 pub async fn set_state(
